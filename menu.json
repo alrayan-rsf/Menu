@@ -6,14 +6,14 @@
                 "id": 101,
                 "name": "شيش طاووق",
                 "desc": "قطع دجاج متبلة مشوية على الفحم",
-                "price": 35,
+                "price": 5000,
                 "img": "images/shish_tawook.jpg"
             },
             {
                 "id": 102,
                 "name": "مشاوي مشكلة",
                 "desc": "أسياخ دجاج ولحم مع أرز ومقبلات",
-                "price": 50,
+                "price": 19000,
                 "img": "images/mixed_grill.jpg"
             }
         ]
@@ -25,14 +25,14 @@
                 "id": 201,
                 "name": "حمص",
                 "desc": "حمص مع زيت زيتون وبقدونس",
-                "price": 12,
+                "price": 2000,
                 "img": "images/hummus.jpg"
             },
             {
                 "id": 202,
                 "name": "متبل",
                 "desc": "باذنجان مشوي مع طحينة",
-                "price": 14,
+                "price": 2000,
                 "img": "images/moutabal.jpg"
             }
         ]
@@ -44,14 +44,14 @@
                 "id": 301,
                 "name": "عصير برتقال طازج",
                 "desc": "بدون سكر، طبيعي 100%",
-                "price": 10,
+                "price": 1500,
                 "img": "images/orange_juice.jpg"
             },
             {
                 "id": 302,
                 "name": "كوكتيل فواكه",
                 "desc": "مزيج الموز والفراولة والحليب",
-                "price": 15,
+                "price": 1500,
                 "img": "images/fruit_cocktail.jpg"
             }
         ]
