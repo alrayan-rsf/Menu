@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>賲胤毓賲 丕賱乇賷丕賳 賱賱兀胤亘丕賯 丕賱亘丨乇賷丞 - 丕賱賯丕卅賲丞 丕賱匕賰賷丞</title>
+    <title>مطعم الريان للأطباق البحرية - القائمة الذكية</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -33,7 +33,7 @@
             overflow-x: hidden;
         }
 
-        /* --- Header (丕賱鬲乇賵賷爻丞 丕賱廿亘丿丕毓賷丞) --- */
+        /* --- Header --- */
         .header {
             position: relative;
             background: linear-gradient(135deg, var(--primary-navy) 0%, var(--primary-light) 100%);
@@ -61,7 +61,7 @@
             letter-spacing: 1px;
         }
 
-        /* --- Logo (丕賱卮毓丕乇 丕賱毓丕卅賲 匕賵 丕賱鬲賵賴噩 丕賱匕賴亘賷) --- */
+        /* --- Logo --- */
         .main-logo {
             position: absolute;
             bottom: -65px;
@@ -83,7 +83,7 @@
             box-shadow: 0 15px 45px rgba(197, 160, 42, 0.6);
         }
 
-        /* --- News Ticker --- */
+        /* --- Seamless News Ticker --- */
         .news-ticker {
             background: var(--card-white);
             height: 45px;
@@ -94,29 +94,37 @@
             border-top: 1px solid #e2e8f0;
             border-bottom: 1px solid #e2e8f0;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+            position: relative;
         }
 
-        .ticker-move {
-            display: inline-block;
-            white-space: nowrap;
-            animation: ticker 40s linear infinite;
+        .ticker-track {
+            display: flex;
+            width: max-content;
+            /* حركة مستمرة بدون فراغات */
+            animation: ticker 30s linear infinite;
+        }
+
+        /* إيقاف الحركة عند اللمس أو التمرير */
+        .ticker-track:hover, .ticker-track:active {
+            animation-play-state: paused;
+            cursor: default;
+        }
+
+        .ticker-group {
+            display: flex;
         }
 
         .ticker-item {
-            display: inline-block;
             padding: 0 40px;
             font-weight: 700;
             font-size: 14px;
             color: var(--primary-navy);
+            white-space: nowrap;
         }
 
         @keyframes ticker {
-            0% {
-                transform: translateX(-100%);
-            }
-            100% {
-                transform: translateX(100%);
-            }
+            0% { transform: translateX(0); }
+            100% { transform: translateX(50%); } /* في المواقع العربية (RTL)، التحريك بنسبة 50% يكمل الحلقة المثالية */
         }
 
         /* --- Main Container --- */
@@ -126,7 +134,7 @@
             padding: 0 20px;
         }
 
-        /* --- Inputs & Tabs --- */
+        /* --- Inputs --- */
         #customer-name {
             width: 100%;
             padding: 18px 20px;
@@ -147,52 +155,72 @@
             box-shadow: 0 0 0 4px rgba(197, 160, 42, 0.1);
         }
 
-        /* === 廿囟丕賮丞: 卮乇賷胤 丕賱亘丨孬 === */
-        .search-container {
+        /* === شريط التبويبات والبحث المدمج الإبداعي === */
+        .menu-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
             margin-bottom: 25px;
-            position: relative;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 18px 55px 18px 20px;
-            border: 2px solid #e2e8f0;
-            border-radius: 20px;
-            font-size: 16px;
-            text-align: center;
-            font-weight: 600;
             background: var(--card-white);
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+            padding: 8px;
+            border-radius: 35px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            border: 1px solid #e2e8f0;
         }
 
-        .search-input:focus {
+        /* حقل البحث المتمدد */
+        .search-tab-container {
+            position: relative;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-input-tab {
+            width: 50px; /* يبدأ كدائرة صغيرة */
+            height: 45px;
+            border-radius: 30px;
+            border: 2px solid transparent;
+            background: #f1f5f9;
+            padding: 0 40px 0 15px;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-dark);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .search-input-tab:focus, 
+        .search-input-tab:not(:placeholder-shown) {
+            width: 200px;
             border-color: var(--gold-shine);
-            outline: none;
+            background: var(--card-white);
             box-shadow: 0 0 0 4px rgba(197, 160, 42, 0.1);
+            cursor: text;
         }
 
         .search-icon {
             position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 22px;
+            right: 15px;
             color: var(--text-muted);
             pointer-events: none;
+            font-size: 18px;
+            transition: color 0.3s;
         }
 
-        .search-clear {
+        .search-input-tab:focus ~ .search-icon {
+            color: var(--gold-shine);
+        }
+
+        .search-clear-tab {
             position: absolute;
-            left: 20px;
-            top: 50%;
-            transform: translateY(-50%);
+            left: 10px;
             background: #e2e8f0;
             border: none;
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            font-size: 16px;
+            width: 24px;
+            height: 24px;
+            font-size: 12px;
             font-weight: bold;
             color: var(--text-muted);
             cursor: pointer;
@@ -202,36 +230,23 @@
             transition: 0.2s;
         }
 
-        .search-clear:hover {
+        .search-clear-tab:hover {
             background: #cbd5e1;
-            color: var(--text-dark);
+            color: var(--danger-red);
         }
 
-        .search-clear.visible {
+        .search-clear-tab.visible {
             display: flex;
         }
 
-        .search-results-title {
-            background: var(--gold-light);
-            color: var(--primary-navy);
-            padding: 12px 20px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            font-weight: 800;
-            text-align: center;
-            display: none;
-        }
-
-        .search-results-title.visible {
-            display: block;
-        }
-
+        /* التبويبات */
         .tab-nav {
             display: flex;
             overflow-x: auto;
-            gap: 10px;
-            padding-bottom: 20px;
+            gap: 8px;
+            flex-grow: 1;
             scrollbar-width: none;
+            padding-left: 5px;
         }
 
         .tab-nav::-webkit-scrollbar {
@@ -240,39 +255,48 @@
 
         .tab-btn {
             padding: 10px 25px;
-            background: var(--card-white);
-            border: 1px solid #e2e8f0;
+            background: transparent;
+            border: 1px solid transparent;
             font-weight: 700;
             border-radius: 30px;
             cursor: pointer;
             color: var(--text-muted);
             white-space: nowrap;
             transition: 0.3s;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
             font-size: 15px;
         }
 
         .tab-btn:hover {
-            border-color: var(--gold-light);
+            background: #f8fafc;
+            color: var(--primary-navy);
         }
 
         .tab-btn.active {
             background: var(--gold-shine);
             color: var(--card-white);
-            border-color: var(--gold-shine);
             box-shadow: 0 4px 10px rgba(197, 160, 42, 0.3);
+        }
+
+        .search-results-title {
+            background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold-shine) 100%);
+            color: var(--card-white);
+            padding: 15px 20px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            font-weight: 800;
+            text-align: center;
+            display: none;
+            box-shadow: 0 4px 10px rgba(197, 160, 42, 0.2);
+        }
+
+        .search-results-title.visible {
+            display: block;
         }
 
         /* --- Menu Grid & Animations --- */
         @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .menu-grid {
@@ -356,13 +380,8 @@
             font-size: 15px;
         }
 
-        .add-btn:hover {
-            background: var(--primary-light);
-        }
-
-        .add-btn:active {
-            transform: scale(0.97);
-        }
+        .add-btn:hover { background: var(--primary-light); }
+        .add-btn:active { transform: scale(0.97); }
 
         /* --- Floating Cart Bar --- */
         .cart-bar {
@@ -393,25 +412,10 @@
             flex-grow: 1;
         }
 
-        .cart-info .icon {
-            font-size: 24px;
-        }
-
-        .cart-info .details {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .cart-info .count {
-            font-weight: 700;
-            font-size: 14px;
-            color: var(--gold-light);
-        }
-
-        .cart-info .total {
-            font-weight: 900;
-            font-size: 16px;
-        }
+        .cart-info .icon { font-size: 24px; }
+        .cart-info .details { display: flex; flex-direction: column; }
+        .cart-info .count { font-weight: 700; font-size: 14px; color: var(--gold-light); }
+        .cart-info .total { font-weight: 900; font-size: 16px; }
 
         .checkout-btn {
             background: var(--success-green);
@@ -425,19 +429,15 @@
             transition: 0.3s;
         }
 
-        .checkout-btn:hover {
-            filter: brightness(1.1);
-        }
+        .checkout-btn:hover { filter: brightness(1.1); }
 
         /* --- Modal (Cart Review) --- */
         .modal {
             display: none;
             position: fixed;
             z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.6);
             backdrop-filter: blur(4px);
         }
@@ -488,194 +488,155 @@
             border: 1px solid #f1f5f9;
         }
 
-        .item-title {
-            font-weight: 700;
-            color: var(--primary-navy);
-            margin-bottom: 5px;
-        }
-
-        .item-price {
-            color: var(--gold-shine);
-            font-weight: 900;
-            font-size: 14px;
-        }
+        .item-title { font-weight: 700; color: var(--primary-navy); margin-bottom: 5px; }
+        .item-price { color: var(--gold-shine); font-weight: 900; font-size: 14px; }
 
         .qty-controls {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: var(--bg-soft);
-            padding: 5px;
-            border-radius: 10px;
-            border: 1px solid #e2e8f0;
+            display: flex; align-items: center; gap: 12px;
+            background: var(--bg-soft); padding: 5px;
+            border-radius: 10px; border: 1px solid #e2e8f0;
         }
 
         .qty-btn {
-            width: 30px;
-            height: 30px;
-            border-radius: 8px;
-            border: none;
-            background: var(--card-white);
-            font-weight: 900;
-            color: var(--primary-navy);
-            cursor: pointer;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            width: 30px; height: 30px; border-radius: 8px;
+            border: none; background: var(--card-white);
+            font-weight: 900; color: var(--primary-navy);
+            cursor: pointer; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             transition: 0.2s;
         }
 
-        .qty-btn:hover {
-            background: #e2e8f0;
-        }
+        .qty-btn:hover { background: #e2e8f0; }
+        .qty-btn.delete { color: var(--danger-red); }
 
-        .qty-btn.delete {
-            color: var(--danger-red);
-        }
-
-        .modal-footer {
-            padding-top: 15px;
-            border-top: 2px solid #e2e8f0;
-        }
-
+        .modal-footer { padding-top: 15px; border-top: 2px solid #e2e8f0; }
         .modal-total-row {
-            display: flex;
-            justify-content: space-between;
-            font-weight: 900;
-            font-size: 18px;
-            margin-bottom: 15px;
+            display: flex; justify-content: space-between;
+            font-weight: 900; font-size: 18px; margin-bottom: 15px;
             color: var(--primary-navy);
         }
 
-        .action-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
+        .action-buttons { display: flex; flex-direction: column; gap: 10px; }
+        
         .btn-whatsapp {
-            background: var(--success-green);
-            color: white;
-            border: none;
-            padding: 15px;
-            border-radius: 15px;
-            font-weight: 800;
-            cursor: pointer;
-            font-size: 16px;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
+            background: var(--success-green); color: white; border: none;
+            padding: 15px; border-radius: 15px; font-weight: 800; cursor: pointer;
+            font-size: 16px; width: 100%; display: flex; justify-content: center;
+            align-items: center; gap: 8px;
         }
 
         .btn-clear {
-            background: #ffe4e6;
-            color: var(--danger-red);
-            border: none;
-            padding: 12px;
-            border-radius: 15px;
-            font-weight: 700;
-            cursor: pointer;
-            width: 100%;
+            background: #ffe4e6; color: var(--danger-red); border: none;
+            padding: 12px; border-radius: 15px; font-weight: 700;
+            cursor: pointer; width: 100%;
         }
 
         .close-modal-icon {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: #e2e8f0;
-            border: none;
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            font-weight: bold;
-            cursor: pointer;
-            color: var(--text-muted);
+            position: absolute; top: 20px; right: 20px; background: #e2e8f0;
+            border: none; width: 35px; height: 35px; border-radius: 50%;
+            font-weight: bold; cursor: pointer; color: var(--text-muted);
         }
 
-        .loader {
-            text-align: center;
-            padding: 50px;
-            font-weight: bold;
-            color: var(--primary-navy);
-        }
+        .loader { text-align: center; padding: 50px; font-weight: bold; color: var(--primary-navy); }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>賲胤毓賲 丕賱乇賷丕賳 賱賱兀胤亘丕賯 丕賱亘丨乇賷丞</h1>
-        <p class="subtitle">兀氐丕賱丞 丕賱賲匕丕賯 丕賱亘丨乇賷</p>
-        <img src="logo.jpg" alt="卮毓丕乇 賲胤毓賲 丕賱乇賷丕賳" class="main-logo" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'140\' height=\'140\' style=\'background:%23fff;border-radius:50%25\'%3E%3Ctext x=\'50%25\' y=\'50%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' fill=\'%23c5a02a\' font-weight=\'bold\'%3E丕賱乇賷丕賳%3C/text%3E%3C/svg%3E'">
+        <h1>مطعم الريان للأطباق البحرية</h1>
+        <p class="subtitle">أصالة المذاق البحري</p>
+        <img src="logo.jpg" alt="شعار مطعم الريان" class="main-logo" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'140\' height=\'140\' style=\'background:%23fff;border-radius:50%25\'%3E%3Ctext x=\'50%25\' y=\'50%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' fill=\'%23c5a02a\' font-weight=\'bold\'%3Eالريان%3C/text%3E%3C/svg%3E'">
     </div>
+
+    <!-- شريط الأخبار المحدث والمستمر -->
     <div class="news-ticker">
-        <div class="ticker-move">
-            <span class="ticker-item">鉁� 兀賴賱丕賸 亘賰賲 賮賷 賲胤毓賲 丕賱乇賷丕賳 | 丨賷孬 賷噩鬲賲毓 丕賱廿亘丿丕毓 賵丕賱鬲賲賷夭 賮賷 鬲賯丿賷賲 兀卮賴賶 丕賱賲兀賰賵賱丕鬲 丕賱亘丨乇賷丞 鉁�</span>
-            <span class="ticker-item">馃搷 毓丿賳貙 賰乇賷鬲乇貙 丕賱賲賷丿丕賳貙 噩賵丕乇 賮賳丿賯 丕賱毓丕賲乇</span>
-            <span class="ticker-item">馃摓 賱賱鬲賵丕氐賱: 256756 - 256757 | 馃摫 771256757 - 771256756</span>
-            <span class="ticker-item">鉁� 胤毓賲 丕賱亘丨乇 丕賱兀氐賷賱 亘賷賳 賷丿賷賰 鉁�</span>
-        </div>
-    </div>
-    <div class="container">
-        <input type="text" id="customer-name" placeholder="賮囟賱丕賸 丕賰鬲亘 丕爻賲賰 丕賱賰乇賷賲 賴賳丕 賱禺丿賲鬲賰...">
-
-        <!-- === 廿囟丕賮丞: 卮乇賷胤 丕賱亘丨孬 === -->
-        <div class="search-container">
-            <span class="search-icon">馃攳</span>
-            <input type="text" id="search-input" class="search-input" placeholder="丕亘丨孬 毓賳 氐賳賮...">
-            <button id="search-clear-btn" class="search-clear">鉁�</button>
-        </div>
-        <div id="search-results-title" class="search-results-title">
-            馃攳 賳鬲丕卅噩 丕賱亘丨孬 毓賳 "<span id="search-term-display"></span>"
-        </div>
-
-        <div class="tab-nav" id="tab-nav"></div>
-        <div id="menu-container">
-            <div class="loader">噩丕乇賷 鬲丨賲賷賱 丕賱賯丕卅賲丞 丕賱匕賰賷丞...</div>
-        </div>
-    </div>
-    <div class="cart-bar" id="cart-bar" style="display: none;">
-        <div class="cart-info" id="cart-toggle">
-            <div class="icon">馃洅</div>
-            <div class="details">
-                <span class="count"><span id="cart-count">0</span> 兀氐賳丕賮</span>
-                <span class="total"><span id="cart-total">0</span> 乇.賷</span>
+        <div class="ticker-track">
+            <!-- المجموعة الأولى -->
+            <div class="ticker-group">
+                <span class="ticker-item">✨ أهلاً بكم في مطعم الريان | حيث يجتمع الإبداع والتميز في تقديم أشهى المأكولات البحرية ✨</span>
+                <span class="ticker-item">📍 عدن، كريتر، الميدان، جوار فندق العامر</span>
+                <span class="ticker-item">📞 للتواصل: 256756 - 256757 | 📱 771256757 - 771256756</span>
+                <span class="ticker-item">✨ طعم البحر الأصيل بين يديك ✨</span>
+            </div>
+            <!-- المجموعة الثانية (مكررة لضمان عدم وجود فراغ أثناء الدوران) -->
+            <div class="ticker-group" aria-hidden="true">
+                <span class="ticker-item">✨ أهلاً بكم في مطعم الريان | حيث يجتمع الإبداع والتميز في تقديم أشهى المأكولات البحرية ✨</span>
+                <span class="ticker-item">📍 عدن، كريتر، الميدان، جوار فندق العامر</span>
+                <span class="ticker-item">📞 للتواصل: 256756 - 256757 | 📱 771256757 - 771256756</span>
+                <span class="ticker-item">✨ طعم البحر الأصيل بين يديك ✨</span>
             </div>
         </div>
-        <button class="checkout-btn" id="main-checkout-btn">鬲兀賰賷丿 丕賱胤賱亘</button>
     </div>
+
+    <div class="container">
+        <input type="text" id="customer-name" placeholder="فضلاً اكتب اسمك الكريم هنا لخدمتك...">
+
+        <!-- شريط التبويبات مع حقل البحث المدمج -->
+        <div class="menu-controls">
+            <!-- حقل البحث المتمدد -->
+            <div class="search-tab-container">
+                <input type="text" id="search-input" class="search-input-tab" placeholder="ابحث...">
+                <span class="search-icon">🔍</span>
+                <button id="search-clear-btn" class="search-clear-tab">✕</button>
+            </div>
+            <!-- التبويبات -->
+            <div class="tab-nav" id="tab-nav"></div>
+        </div>
+
+        <div id="search-results-title" class="search-results-title">
+            🔍 نتائج البحث عن "<span id="search-term-display"></span>"
+        </div>
+
+        <div id="menu-container">
+            <div class="loader">جاري تحميل القائمة الذكية...</div>
+        </div>
+    </div>
+
+    <!-- Floating Cart & Modal (بدون تغييرات في الهيكل الأساسي) -->
+    <div class="cart-bar" id="cart-bar" style="display: none;">
+        <div class="cart-info" id="cart-toggle">
+            <div class="icon">🛒</div>
+            <div class="details">
+                <span class="count"><span id="cart-count">0</span> أصناف</span>
+                <span class="total"><span id="cart-total">0</span> ر.ي</span>
+            </div>
+        </div>
+        <button class="checkout-btn" id="main-checkout-btn">تأكيد الطلب</button>
+    </div>
+
     <div id="cart-modal" class="modal">
         <div class="modal-content">
-            <button class="close-modal-icon" id="close-modal-btn">鉁�</button>
+            <button class="close-modal-icon" id="close-modal-btn">✕</button>
             <div class="modal-header">
-                <h2>馃摝 賲乇丕噩毓丞 丕賱胤賱亘</h2>
+                <h2>📦 مراجعة الطلب</h2>
             </div>
             <div class="cart-items-container" id="cart-items-list"></div>
             <div class="modal-footer">
                 <div class="modal-total-row">
-                    <span>丕賱廿噩賲丕賱賷 丕賱賳賴丕卅賷:</span>
-                    <span><span id="modal-total">0</span> 乇.賷</span>
+                    <span>الإجمالي النهائي:</span>
+                    <span><span id="modal-total">0</span> ر.ي</span>
                 </div>
                 <div class="action-buttons">
                     <button id="whatsapp-send" class="btn-whatsapp">
                         <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.487-1.761-1.663-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
-                        廿乇爻丕賱 丕賱胤賱亘 毓亘乇 賵丕鬲爻丕亘
+                        إرسال الطلب عبر واتساب
                     </button>
-                    <button id="clear-cart" class="btn-clear">馃棏锔� 廿賮乇丕睾 丕賱爻賱丞</button>
+                    <button id="clear-cart" class="btn-clear">🗑️ إفراغ السلة</button>
                 </div>
             </div>
         </div>
     </div>
+
     <script>
-        const restaurantPhone = "967735168698";
+        // رقم الواتساب المعتمد والمحدث مسبقاً
+        const restaurantPhone = "967735168698"; 
         const STORAGE_KEY = 'rayyan_restaurant_cart';
         let menuData = [];
         let cart = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-        let currentTabIndex = 0; // === 廿囟丕賮丞: 賱鬲鬲亘毓 丕賱鬲亘賵賷亘 丕賱賳卮胤 ===
-        let isSearching = false; // === 廿囟丕賮丞: 丨丕賱丞 丕賱亘丨孬 ===
+        let currentTabIndex = 0;
+        let isSearching = false;
 
         document.addEventListener('DOMContentLoaded', () => {
             fetchMenu();
             updateCartUI();
-            // === 廿囟丕賮丞: 乇亘胤 兀丨丿丕孬 丕賱亘丨孬 ===
             setupSearch();
         });
 
@@ -689,7 +650,7 @@
             } catch (error) {
                 document.getElementById('menu-container').innerHTML = `
                     <div style="text-align:center; padding: 40px; color: var(--danger-red); font-weight: bold;">
-                        鈿狅笍 毓匕乇丕賸貙 鬲兀賰丿 賲賳 乇賮毓 賲賱賮 menu.json 廿賱賶 GitHub 亘噩賵丕乇 賲賱賮 index.html
+                        ⚠️ عذراً، تأكد من رفع ملف menu.json بجوار ملف index.html
                     </div>`;
             }
         }
@@ -702,8 +663,7 @@
                 btn.className = `tab-btn ${i === 0 ? 'active' : ''}`;
                 btn.innerText = cat.category;
                 btn.onclick = (e) => {
-                    // === 鬲毓丿賷賱: 廿毓丕丿丞 鬲毓賷賷賳 丕賱亘丨孬 毓賳丿 丕賱賳賯乇 毓賱賶 鬲亘賵賷亘 ===
-                    clearSearch();
+                    clearSearch(); // مسح البحث عند اختيار تبويب جديد
                     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
                     e.target.classList.add('active');
                     currentTabIndex = i;
@@ -724,7 +684,7 @@
                 grid.innerHTML += `
                     <div class="item" style="animation-delay: ${animationDelay}s;">
                         <div class="item-img-wrap">
-                            <img src="${item.img}" alt="${item.name}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\\'http://www.w3.org/2000/svg\\\' width=\\\'260\\\' height=\\\'200\\\' style=\\\'background:%23f1f5f9;\\\'%3E%3Ctext x=\\\'50%25\\\' y=\\\'50%25\\\' dominant-baseline=\\\'middle\\\' text-anchor=\\\'middle\\\' fill=\\\'%2394a3b8\\\'%3E氐賵乇丞 睾賷乇 賲鬲賵賮乇丞%3C/text%3E%3C/svg%3E'">
+                            <img src="${item.img}" alt="${item.name}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\\'http://www.w3.org/2000/svg\\\' width=\\\'260\\\' height=\\\'200\\\' style=\\\'background:%23f1f5f9;\\\'%3E%3Ctext x=\\\'50%25\\\' y=\\\'50%25\\\' dominant-baseline=\\\'middle\\\' text-anchor=\\\'middle\\\' fill=\\\'%2394a3b8\\\'%3Eصورة غير متوفرة%3C/text%3E%3C/svg%3E'">
                         </div>
                         <div class="item-info">
                             <div>
@@ -732,8 +692,8 @@
                                 ${descHtml}
                             </div>
                             <div>
-                                <div class="price">${item.price.toLocaleString()} 乇.賷</div>
-                                <button class="add-btn" onclick="addToCart(${item.id}, '${item.name}', ${item.price})">鉃� 廿囟丕賮丞 賱賱爻賱丞</button>
+                                <div class="price">${item.price.toLocaleString()} ر.ي</div>
+                                <button class="add-btn" onclick="addToCart(${item.id}, '${item.name}', ${item.price})">➕ إضافة للسلة</button>
                             </div>
                         </div>
                     </div>`;
@@ -741,14 +701,13 @@
             container.appendChild(grid);
         }
 
-        // === 廿囟丕賮丞: 丿丕賱丞 毓乇囟 丕賱兀氐賳丕賮 賲賳 賲氐賮賵賮丞 賲亘丕卮乇丞 (賱賳鬲丕卅噩 丕賱亘丨孬) ===
         function renderItemsFromArray(items, searchTerm = '') {
             const container = document.getElementById('menu-container');
             container.innerHTML = '';
             if (items.length === 0) {
                 container.innerHTML = `
                     <div style="text-align:center; padding: 40px; color: #64748b; font-weight: bold;">
-                        馃攳 賱丕 鬲賵噩丿 兀氐賳丕賮 鬲胤丕亘賯 "<span style="color: var(--gold-shine);">${searchTerm}</span>"
+                        🔍 لا توجد أصناف تطابق "<span style="color: var(--gold-shine);">${searchTerm}</span>"
                     </div>`;
                 return;
             }
@@ -760,7 +719,7 @@
                 grid.innerHTML += `
                     <div class="item" style="animation-delay: ${animationDelay}s;">
                         <div class="item-img-wrap">
-                            <img src="${item.img}" alt="${item.name}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\\'http://www.w3.org/2000/svg\\\' width=\\\'260\\\' height=\\\'200\\\' style=\\\'background:%23f1f5f9;\\\'%3E%3Ctext x=\\\'50%25\\\' y=\\\'50%25\\\' dominant-baseline=\\\'middle\\\' text-anchor=\\\'middle\\\' fill=\\\'%2394a3b8\\\'%3E氐賵乇丞 睾賷乇 賲鬲賵賮乇丞%3C/text%3E%3C/svg%3E'">
+                            <img src="${item.img}" alt="${item.name}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\\'http://www.w3.org/2000/svg\\\' width=\\\'260\\\' height=\\\'200\\\' style=\\\'background:%23f1f5f9;\\\'%3E%3Ctext x=\\\'50%25\\\' y=\\\'50%25\\\' dominant-baseline=\\\'middle\\\' text-anchor=\\\'middle\\\' fill=\\\'%2394a3b8\\\'%3Eصورة غير متوفرة%3C/text%3E%3C/svg%3E'">
                         </div>
                         <div class="item-info">
                             <div>
@@ -768,8 +727,8 @@
                                 ${descHtml}
                             </div>
                             <div>
-                                <div class="price">${item.price.toLocaleString()} 乇.賷</div>
-                                <button class="add-btn" onclick="addToCart(${item.id}, '${item.name}', ${item.price})">鉃� 廿囟丕賮丞 賱賱爻賱丞</button>
+                                <div class="price">${item.price.toLocaleString()} ر.ي</div>
+                                <button class="add-btn" onclick="addToCart(${item.id}, '${item.name}', ${item.price})">➕ إضافة للسلة</button>
                             </div>
                         </div>
                     </div>`;
@@ -777,11 +736,9 @@
             container.appendChild(grid);
         }
 
-        // === 廿囟丕賮丞: 廿毓丿丕丿 丕賱亘丨孬 ===
         function setupSearch() {
             const searchInput = document.getElementById('search-input');
             const clearBtn = document.getElementById('search-clear-btn');
-            const tabNav = document.getElementById('tab-nav');
             const resultsTitle = document.getElementById('search-results-title');
             const termDisplay = document.getElementById('search-term-display');
 
@@ -789,25 +746,23 @@
                 const term = this.value.trim();
 
                 if (term.length === 0) {
-                    // === 乇噩賵毓 賱賱鬲亘賵賷亘 丕賱丨丕賱賷 ===
                     clearSearch();
                     return;
                 }
 
-                // === 鬲賳卮賷胤 賵囟毓 丕賱亘丨孬 ===
                 isSearching = true;
                 clearBtn.classList.add('visible');
-                tabNav.style.display = 'none';
                 resultsTitle.classList.add('visible');
                 termDisplay.textContent = term;
+                
+                // إزالة التفعيل من كل التبويبات عند البحث
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
 
-                // === 噩賲毓 賰賱 丕賱兀氐賳丕賮 賲賳 噩賲賷毓 丕賱兀賯爻丕賲 ===
                 const allItems = [];
                 menuData.forEach(cat => {
                     allItems.push(...cat.items);
                 });
 
-                // === 賮賱鬲乇丞 亘丕賱丕爻賲 兀賵 丕賱賵氐賮 ===
                 const filtered = allItems.filter(item =>
                     item.name.toLowerCase().includes(term.toLowerCase()) ||
                     (item.desc && item.desc.toLowerCase().includes(term.toLowerCase()))
@@ -819,16 +774,16 @@
             clearBtn.addEventListener('click', function() {
                 searchInput.value = '';
                 clearSearch();
-                searchInput.focus();
+                // إعادة تفعيل التبويب الحالي
+                const tabs = document.querySelectorAll('.tab-btn');
+                if(tabs[currentTabIndex]) tabs[currentTabIndex].classList.add('active');
             });
         }
 
-        // === 廿囟丕賮丞: 賲爻丨 丕賱亘丨孬 賵丕賱毓賵丿丞 賱賱賵囟毓 丕賱胤亘賷毓賷 ===
         function clearSearch() {
             isSearching = false;
             document.getElementById('search-input').value = '';
             document.getElementById('search-clear-btn').classList.remove('visible');
-            document.getElementById('tab-nav').style.display = 'flex';
             document.getElementById('search-results-title').classList.remove('visible');
             if (menuData.length > 0) renderItems(currentTabIndex);
         }
@@ -866,7 +821,7 @@
         }
 
         function clearCart() {
-            if (confirm('賴賱 兀賳鬲 賲鬲兀賰丿 賲賳 賲爻丨 噩賲賷毓 丕賱胤賱亘丕鬲 賲賳 丕賱爻賱丞責')) {
+            if (confirm('هل أنت متأكد من مسح جميع الطلبات من السلة؟')) {
                 cart = [];
                 saveCart();
                 closeModal();
@@ -874,7 +829,7 @@
         }
 
         function openModal() {
-            if (cart.length === 0) return alert("爻賱丞 丕賱胤賱亘丕鬲 賮丕乇睾丞 丨丕賱賷丕賸!");
+            if (cart.length === 0) return alert("سلة الطلبات فارغة حالياً!");
             renderCartModalItems();
             document.getElementById('cart-modal').style.display = 'block';
             document.body.style.overflow = 'hidden';
@@ -894,13 +849,13 @@
                     <div class="cart-item">
                         <div>
                             <div class="item-title">${item.name}</div>
-                            <div class="item-price">${subtotal.toLocaleString()} 乇.賷 <small style="color:#94a3b8; font-weight:normal;">(${item.price.toLocaleString()} 賱賱丨亘丞)</small></div>
+                            <div class="item-price">${subtotal.toLocaleString()} ر.ي <small style="color:#94a3b8; font-weight:normal;">(${item.price.toLocaleString()} للحبة)</small></div>
                         </div>
                         <div class="qty-controls">
                             <button class="qty-btn" onclick="updateQty(${item.id}, 1)">+</button>
                             <span style="font-weight:900; width: 20px; text-align:center;">${item.qty}</span>
                             <button class="qty-btn ${item.qty === 1 ? 'delete' : ''}" onclick="updateQty(${item.id}, -1)">
-                                ${item.qty === 1 ? '馃棏锔�' : '-'}
+                                ${item.qty === 1 ? '🗑️' : '-'}
                             </button>
                         </div>
                     </div>`;
@@ -911,24 +866,24 @@
             const customerNameInput = document.getElementById('customer-name');
             const customerName = customerNameInput.value.trim();
             if (!customerName) {
-                alert("賮囟賱丕賸貙 兀丿禺賱 丕爻賲賰 丕賱賰乇賷賲 賮賷 丕賱兀毓賱賶 賱賳鬲賲賰賳 賲賳 鬲丨囟賷乇 胤賱亘賰 亘丕爻賲賰.");
+                alert("فضلاً، أدخل اسمك الكريم في الأعلى لنتمكن من تحضير طلبك باسمك.");
                 closeModal();
                 customerNameInput.focus();
                 return;
             }
             if (cart.length === 0) return;
-            let message = `*馃嵔锔� 胤賱亘 噩丿賷丿 賲賳 賲胤毓賲 丕賱乇賷丕賳*%0A`;
-            message += `*丕賱毓賲賷賱:* ${customerName}%0A`;
+            let message = `*🍽️ طلب جديد من مطعم الريان*%0A`;
+            message += `*العميل:* ${customerName}%0A`;
             message += `---------------------------%0A`;
             let total = 0;
             cart.forEach(item => {
                 const subtotal = item.price * item.qty;
-                message += `鈻笍 ${item.qty} 脳 ${item.name} = ${subtotal.toLocaleString()} 乇.賷%0A`;
+                message += `▪️ ${item.qty} × ${item.name} = ${subtotal.toLocaleString()} ر.ي%0A`;
                 total += subtotal;
             });
             message += `---------------------------%0A`;
-            message += `*馃挵 丕賱廿噩賲丕賱賷 丕賱賳賴丕卅賷: ${total.toLocaleString()} 乇.賷*%0A`;
-            message += `丕賱乇噩丕亍 鬲兀賰賷丿 丕爻鬲賱丕賲 丕賱胤賱亘貙 卮賰乇丕賸 賱賰賲!`;
+            message += `*💰 الإجمالي النهائي: ${total.toLocaleString()} ر.ي*%0A`;
+            message += `الرجاء تأكيد استلام الطلب، شكراً لكم!`;
             window.open(`https://wa.me/${restaurantPhone}?text=${message}`, '_blank');
         }
 
