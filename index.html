@@ -52,7 +52,6 @@
             color: var(--card-white);
             text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
             margin-bottom: 5px;
-            margin-top: 10px;
         }
 
         .header p.subtitle {
@@ -60,220 +59,6 @@
             font-size: 15px;
             font-weight: 700;
             letter-spacing: 1px;
-        }
-
-        /* --- Hamburger Menu Icon --- */
-        .hamburger-btn {
-            position: absolute;
-            top: 25px;
-            right: 25px;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            z-index: 100;
-            padding: 5px;
-        }
-
-        .hamburger-btn span {
-            display: block;
-            width: 35px;
-            height: 4px;
-            background-color: var(--gold-shine);
-            border-radius: 4px;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .hamburger-btn:hover span {
-            background-color: var(--gold-light);
-        }
-
-        /* --- Sidebar Overlay & Menu --- */
-        .sidebar-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(14, 26, 53, 0.6);
-            backdrop-filter: blur(4px);
-            z-index: 1001;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.4s ease;
-        }
-
-        .sidebar-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .sidebar-menu {
-            position: fixed;
-            top: 0;
-            right: -320px; /* Hidden off-screen to the right */
-            width: 320px;
-            max-width: 85vw;
-            height: 100vh;
-            background: var(--card-white);
-            z-index: 1002;
-            box-shadow: -5px 0 25px rgba(0,0,0,0.1);
-            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-        }
-
-        .sidebar-menu.active {
-            right: 0;
-        }
-
-        .sidebar-header {
-            background: linear-gradient(135deg, var(--primary-navy) 0%, var(--primary-light) 100%);
-            color: var(--card-white);
-            padding: 25px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .sidebar-header h2 {
-            font-size: 20px;
-            font-weight: 900;
-            color: var(--gold-shine);
-        }
-
-        .close-sidebar-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            color: var(--card-white);
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            font-size: 16px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .close-sidebar-btn:hover {
-            background: var(--danger-red);
-        }
-
-        .sidebar-content {
-            padding: 20px;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .sidebar-main-action {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 15px;
-            background: #f1f5f9;
-            border-radius: 15px;
-            color: var(--primary-navy);
-            text-decoration: none;
-            font-weight: 800;
-            font-size: 16px;
-            transition: 0.3s;
-            border: 2px solid transparent;
-        }
-
-        .sidebar-main-action:hover {
-            background: var(--card-white);
-            border-color: var(--gold-shine);
-            box-shadow: 0 4px 10px rgba(197, 160, 42, 0.15);
-        }
-
-        .sidebar-section {
-            background: var(--card-white);
-            border: 1px solid #e2e8f0;
-            border-radius: 20px;
-            padding: 15px;
-        }
-
-        .sidebar-section h3 {
-            font-size: 16px;
-            color: var(--text-muted);
-            margin-bottom: 15px;
-            padding-right: 5px;
-            border-right: 3px solid var(--gold-shine);
-        }
-
-        .sidebar-link {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 10px;
-            color: var(--text-dark);
-            text-decoration: none;
-            font-weight: 700;
-            border-radius: 10px;
-            transition: 0.2s;
-        }
-
-        .sidebar-link:hover {
-            background: #f8fafc;
-            color: var(--primary-light);
-            padding-right: 15px;
-        }
-
-        .about-card {
-            background: linear-gradient(to bottom, #ffffff, #f8fafc);
-            border: 1px solid #e2e8f0;
-            border-radius: 20px;
-            padding: 20px;
-            margin-top: auto;
-            text-align: center;
-        }
-
-        .about-card h3 {
-            color: var(--primary-navy);
-            font-weight: 900;
-            margin-bottom: 10px;
-        }
-
-        .about-welcome {
-            font-size: 14px;
-            color: var(--gold-shine);
-            font-weight: 700;
-            margin-bottom: 15px;
-        }
-
-        .about-info {
-            list-style: none;
-            text-align: right;
-            font-size: 13px;
-            color: var(--text-muted);
-            line-height: 1.8;
-            margin-bottom: 15px;
-        }
-
-        .about-info strong {
-            color: var(--text-dark);
-        }
-
-        .btn-whatsapp-sidebar {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            background: var(--success-green);
-            color: white;
-            text-decoration: none;
-            padding: 10px;
-            border-radius: 12px;
-            font-weight: 800;
-            font-size: 14px;
-            transition: 0.3s;
-        }
-
-        .btn-whatsapp-sidebar:hover {
-            filter: brightness(1.1);
-            transform: translateY(-2px);
         }
 
         /* --- Logo --- */
@@ -368,7 +153,7 @@
             box-shadow: 0 0 0 4px rgba(197, 160, 42, 0.1);
         }
 
-        /* === شريط التبويبات والبحث === */
+        /* === شريط التبويبات والبحث المدمج الإبداعي === */
         .menu-controls {
             display: flex;
             align-items: center;
@@ -587,7 +372,7 @@
         .add-btn:hover { background: var(--primary-light); }
         .add-btn:active { transform: scale(0.97); }
 
-        /* --- Floating Cart Bar --- */
+        /* --- Floating Cart Bar & Pulse Animation --- */
         @keyframes pulseCart {
             0% { transform: translateX(-50%) scale(1); }
             50% { transform: translateX(-50%) scale(1.03); background: rgba(30, 58, 138, 0.98); }
@@ -755,30 +540,27 @@
 </head>
 <body>
     <div class="header">
-        <!-- زر القائمة الجانبية (الثلاث شرطات) -->
-        <button class="hamburger-btn" onclick="openSidebar()" aria-label="فتح القائمة">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
-
         <h1>مطعم الريان للأطباق البحرية</h1>
         <p class="subtitle">أصالة المذاق البحري</p>
         <img src="logo.jpg" alt="شعار مطعم الريان" class="main-logo" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'140\' height=\'140\' style=\'background:%23fff;border-radius:50%25\'%3E%3Ctext x=\'50%25\' y=\'50%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' fill=\'%23c5a02a\' font-weight=\'bold\'%3Eالريان%3C/text%3E%3C/svg%3E'">
     </div>
 
-    <!-- شريط الأخبار -->
+    <!-- شريط الأخبار المحدث والمستمر -->
     <div class="news-ticker">
         <div class="ticker-track">
+            <!-- المجموعة الأولى -->
             <div class="ticker-group">
                 <span class="ticker-item">✨ أهلاً بكم في مطعم الريان | حيث يجتمع الإبداع والتميز في تقديم أشهى المأكولات البحرية ✨</span>
                 <span class="ticker-item">📍 عدن، كريتر، الميدان، جوار فندق العامر</span>
                 <span class="ticker-item">📞 للتواصل: 256756 - 256757 | 📱 771256757 - 771256756</span>
+                <span class="ticker-item">✨ طعم البحر الأصيل بين يديك ✨</span>
             </div>
+            <!-- المجموعة الثانية (مكررة لضمان عدم وجود فراغ أثناء الدوران) -->
             <div class="ticker-group" aria-hidden="true">
                 <span class="ticker-item">✨ أهلاً بكم في مطعم الريان | حيث يجتمع الإبداع والتميز في تقديم أشهى المأكولات البحرية ✨</span>
                 <span class="ticker-item">📍 عدن، كريتر، الميدان، جوار فندق العامر</span>
                 <span class="ticker-item">📞 للتواصل: 256756 - 256757 | 📱 771256757 - 771256756</span>
+                <span class="ticker-item">✨ طعم البحر الأصيل بين يديك ✨</span>
             </div>
         </div>
     </div>
@@ -786,12 +568,15 @@
     <div class="container">
         <input type="text" id="customer-name" placeholder="فضلاً اكتب اسمك الكريم هنا لخدمتك...">
 
+        <!-- شريط التبويبات مع حقل البحث المدمج -->
         <div class="menu-controls">
+            <!-- حقل البحث المتمدد -->
             <div class="search-tab-container">
                 <input type="text" id="search-input" class="search-input-tab" placeholder="ابحث...">
                 <span class="search-icon">🔍</span>
                 <button id="search-clear-btn" class="search-clear-tab">✕</button>
             </div>
+            <!-- التبويبات -->
             <div class="tab-nav" id="tab-nav"></div>
         </div>
 
@@ -839,48 +624,6 @@
         </div>
     </div>
 
-    <!-- طبقة التعتيم للقائمة الجانبية -->
-    <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
-
-    <!-- هيكل القائمة الجانبية الإبداعي -->
-    <div class="sidebar-menu" id="sidebar-menu">
-        <div class="sidebar-header">
-            <h2>القائمة الرئيسية</h2>
-            <button class="close-sidebar-btn" onclick="closeSidebar()">✕</button>
-        </div>
-        
-        <div class="sidebar-content">
-            <!-- زر البحث السريع -->
-            <a href="#" class="sidebar-main-action" onclick="focusMainSearch(event)">
-                <span style="font-size: 20px;">🔍</span> 
-                البحث السريع
-            </a>
-
-            <!-- أقسام الطعام -->
-            <div class="sidebar-section">
-                <h3>🍽️ أقسام الطعام</h3>
-                <a href="#" class="sidebar-link" onclick="selectSidebarCategory(event, 'قسم المشويات')">🥩 قسم المشويات</a>
-                <a href="#" class="sidebar-link" onclick="selectSidebarCategory(event, 'قسم العصائر')">🍹 قسم العصائر</a>
-                <a href="#" class="sidebar-link" onclick="selectSidebarCategory(event, 'قسم المقبلات')">🥗 قسم المقبلات</a>
-            </div>
-
-            <!-- بطاقة تعريف المطعم الأنيقة -->
-            <div class="about-card">
-                <h3>حول مطعم الريان</h3>
-                <p class="about-welcome">✨ مطعم الريان يرحب بكم ✨</p>
-                <ul class="about-info">
-                    <li>📍 <strong>العنوان:</strong> اليمن، عدن، كريتر، الميدان جوار فندق العامر</li>
-                    <li>📞 <strong>هاتف:</strong> 256756 - 256757</li>
-                    <li>📱 <strong>جوال:</strong> 771256756 - 771256757</li>
-                </ul>
-                <a href="https://wa.me/967735168698" target="_blank" class="btn-whatsapp-sidebar">
-                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.487-1.761-1.663-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
-                    تواصل معنا عبر واتساب
-                </a>
-            </div>
-        </div>
-    </div>
-
     <script>
         const restaurantPhone = "967735168698"; 
         const STORAGE_KEY = 'rayyan_restaurant_cart';
@@ -894,43 +637,6 @@
             updateCartUI();
             setupSearch();
         });
-
-        /* --- دوال التحكم بالقائمة الجانبية --- */
-        function openSidebar() {
-            document.getElementById('sidebar-menu').classList.add('active');
-            document.getElementById('sidebar-overlay').classList.add('active');
-            document.body.style.overflow = 'hidden'; 
-        }
-
-        function closeSidebar() {
-            document.getElementById('sidebar-menu').classList.remove('active');
-            document.getElementById('sidebar-overlay').classList.remove('active');
-            document.body.style.overflow = 'auto'; 
-        }
-
-        function focusMainSearch(e) {
-            e.preventDefault();
-            closeSidebar();
-            const searchInput = document.getElementById('search-input');
-            searchInput.focus();
-            window.scrollTo({ top: searchInput.offsetTop - 100, behavior: 'smooth' });
-        }
-
-        function selectSidebarCategory(e, categoryName) {
-            e.preventDefault();
-            closeSidebar();
-            const tabs = document.querySelectorAll('.tab-btn');
-            // البحث عن التبويب الذي يطابق الاسم والضغط عليه
-            for (let i = 0; i < tabs.length; i++) {
-                if (tabs[i].innerText === categoryName) {
-                    tabs[i].click();
-                    // التمرير السلس إلى قائمة الطعام
-                    window.scrollTo({ top: document.querySelector('.menu-controls').offsetTop - 20, behavior: 'smooth' });
-                    break;
-                }
-            }
-        }
-        /* ---------------------------------- */
 
         async function fetchMenu() {
             try {
@@ -1050,6 +756,7 @@
                     allItems.push(...cat.items);
                 });
 
+                // تعديل عملية البحث لتتجاهل الوصف تماماً بما أنه تم الاستغناء عنه
                 const filtered = allItems.filter(item =>
                     item.name.toLowerCase().includes(term.toLowerCase())
                 );
@@ -1127,10 +834,7 @@
 
         function closeModal() {
             document.getElementById('cart-modal').style.display = 'none';
-            // لا نلغي الإخفاء إذا كانت القائمة الجانبية مفتوحة
-            if(!document.getElementById('sidebar-menu').classList.contains('active')){
-                document.body.style.overflow = 'auto';
-            }
+            document.body.style.overflow = 'auto';
         }
 
         function renderCartModalItems() {
@@ -1192,8 +896,6 @@
         document.getElementById('close-modal-btn').addEventListener('click', closeModal);
         document.getElementById('whatsapp-send').addEventListener('click', sendOrder);
         document.getElementById('clear-cart').addEventListener('click', clearCart);
-        
-        // إغلاق النوافذ عند النقر خارجها
         window.onclick = function(event) {
             const modal = document.getElementById('cart-modal');
             if (event.target == modal) closeModal();
