@@ -346,14 +346,7 @@
             font-size: 18px;
             color: var(--primary-navy);
             font-weight: 800;
-            margin-bottom: 5px;
-        }
-
-        .item p {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-bottom: 10px;
-            line-height: 1.5;
+            margin-bottom: 15px;
         }
 
         .price {
@@ -684,18 +677,15 @@
             const grid = document.createElement('div');
             grid.className = 'menu-grid';
             menuData[catIdx].items.forEach((item, index) => {
-                const descHtml = item.desc ? `<p>${item.desc}</p>` : '';
                 const animationDelay = index * 0.05;
                 grid.innerHTML += `
                     <div class="item" style="animation-delay: ${animationDelay}s;">
                         <div class="item-img-wrap">
-                            <!-- تم إصلاح شفرة الصورة البديلة (SVG) هنا -->
                             <img src="${item.img}" alt="${item.name}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22260%22 height=%22200%22 style=%22background:%23f1f5f9;%22%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%2394a3b8%22%3Eصورة غير متوفرة%3C/text%3E%3C/svg%3E'">
                         </div>
                         <div class="item-info">
                             <div>
                                 <h3>${item.name}</h3>
-                                ${descHtml}
                             </div>
                             <div>
                                 <div class="price">${item.price.toLocaleString()} ر.ي</div>
@@ -720,18 +710,15 @@
             const grid = document.createElement('div');
             grid.className = 'menu-grid';
             items.forEach((item, index) => {
-                const descHtml = item.desc ? `<p>${item.desc}</p>` : '';
                 const animationDelay = index * 0.05;
                 grid.innerHTML += `
                     <div class="item" style="animation-delay: ${animationDelay}s;">
                         <div class="item-img-wrap">
-                            <!-- تم إصلاح شفرة الصورة البديلة (SVG) هنا أيضاً -->
                             <img src="${item.img}" alt="${item.name}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22260%22 height=%22200%22 style=%22background:%23f1f5f9;%22%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%2394a3b8%22%3Eصورة غير متوفرة%3C/text%3E%3C/svg%3E'">
                         </div>
                         <div class="item-info">
                             <div>
                                 <h3>${item.name}</h3>
-                                ${descHtml}
                             </div>
                             <div>
                                 <div class="price">${item.price.toLocaleString()} ر.ي</div>
@@ -769,9 +756,9 @@
                     allItems.push(...cat.items);
                 });
 
+                // تعديل عملية البحث لتتجاهل الوصف تماماً بما أنه تم الاستغناء عنه
                 const filtered = allItems.filter(item =>
-                    item.name.toLowerCase().includes(term.toLowerCase()) ||
-                    (item.desc && item.desc.toLowerCase().includes(term.toLowerCase()))
+                    item.name.toLowerCase().includes(term.toLowerCase())
                 );
 
                 renderItemsFromArray(filtered, term);
@@ -799,10 +786,9 @@
             else cart.push({ id, name, price, qty: 1 });
             saveCart();
 
-            // إضافة تأثير النبض للسلة العائمة لجذب الانتباه
             const cartBar = document.getElementById('cart-bar');
             cartBar.classList.remove('pulse-anim');
-            void cartBar.offsetWidth; // إعادة تهيئة الـ DOM للسماح بتشغيل التأثير مجدداً
+            void cartBar.offsetWidth; 
             cartBar.classList.add('pulse-anim');
         };
 
@@ -873,7 +859,6 @@
             });
         }
 
-        // تم إصلاح دالة إرسال الطلب وإضافة دالة التشفير وتفريغ السلة
         function sendOrder() {
             const customerNameInput = document.getElementById('customer-name');
             const customerName = customerNameInput.value.trim();
@@ -898,11 +883,9 @@
             message += `*💰 الإجمالي النهائي: ${total.toLocaleString()} ر.ي*\n`;
             message += `الرجاء تأكيد استلام الطلب، شكراً لكم!`;
 
-            // تشفير الرسالة لضمان وصولها بشكل سليم عبر الواتساب
             const encodedMessage = encodeURIComponent(message);
             window.open(`https://wa.me/${restaurantPhone}?text=${encodedMessage}`, '_blank');
             
-            // تفريغ السلة تلقائياً بعد إرسال الطلب بنجاح
             cart = [];
             saveCart();
             closeModal();
