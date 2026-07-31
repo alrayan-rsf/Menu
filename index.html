@@ -100,11 +100,9 @@
         .ticker-track {
             display: flex;
             width: max-content;
-            /* حركة مستمرة بدون فراغات */
             animation: ticker 30s linear infinite;
         }
 
-        /* إيقاف الحركة عند اللمس أو التمرير */
         .ticker-track:hover, .ticker-track:active {
             animation-play-state: paused;
             cursor: default;
@@ -124,7 +122,7 @@
 
         @keyframes ticker {
             0% { transform: translateX(0); }
-            100% { transform: translateX(50%); } /* في المواقع العربية (RTL)، التحريك بنسبة 50% يكمل الحلقة المثالية */
+            100% { transform: translateX(50%); } 
         }
 
         /* --- Main Container --- */
@@ -168,7 +166,6 @@
             border: 1px solid #e2e8f0;
         }
 
-        /* حقل البحث المتمدد */
         .search-tab-container {
             position: relative;
             flex-shrink: 0;
@@ -177,7 +174,7 @@
         }
 
         .search-input-tab {
-            width: 50px; /* يبدأ كدائرة صغيرة */
+            width: 50px; 
             height: 45px;
             border-radius: 30px;
             border: 2px solid transparent;
@@ -239,7 +236,6 @@
             display: flex;
         }
 
-        /* التبويبات */
         .tab-nav {
             display: flex;
             overflow-x: auto;
@@ -383,7 +379,17 @@
         .add-btn:hover { background: var(--primary-light); }
         .add-btn:active { transform: scale(0.97); }
 
-        /* --- Floating Cart Bar --- */
+        /* --- Floating Cart Bar & Pulse Animation --- */
+        @keyframes pulseCart {
+            0% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.03); background: rgba(30, 58, 138, 0.98); }
+            100% { transform: translateX(-50%) scale(1); }
+        }
+        
+        .pulse-anim {
+            animation: pulseCart 0.4s ease-out;
+        }
+
         .cart-bar {
             position: fixed;
             bottom: 20px;
@@ -590,7 +596,7 @@
         </div>
     </div>
 
-    <!-- Floating Cart & Modal (بدون تغييرات في الهيكل الأساسي) -->
+    <!-- Floating Cart & Modal -->
     <div class="cart-bar" id="cart-bar" style="display: none;">
         <div class="cart-info" id="cart-toggle">
             <div class="icon">🛒</div>
@@ -617,7 +623,7 @@
                 <div class="action-buttons">
                     <button id="whatsapp-send" class="btn-whatsapp">
                         <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.487-1.761-1.663-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
-                        إرسال الطلب عبر واتساب
+                        إرسال الطلب عبر واتساب 🛵
                     </button>
                     <button id="clear-cart" class="btn-clear">🗑️ إفراغ السلة</button>
                 </div>
@@ -626,7 +632,6 @@
     </div>
 
     <script>
-        // رقم الواتساب المعتمد والمحدث مسبقاً
         const restaurantPhone = "967735168698"; 
         const STORAGE_KEY = 'rayyan_restaurant_cart';
         let menuData = [];
@@ -663,7 +668,7 @@
                 btn.className = `tab-btn ${i === 0 ? 'active' : ''}`;
                 btn.innerText = cat.category;
                 btn.onclick = (e) => {
-                    clearSearch(); // مسح البحث عند اختيار تبويب جديد
+                    clearSearch(); 
                     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
                     e.target.classList.add('active');
                     currentTabIndex = i;
@@ -684,7 +689,8 @@
                 grid.innerHTML += `
                     <div class="item" style="animation-delay: ${animationDelay}s;">
                         <div class="item-img-wrap">
-                            <img src="${item.img}" alt="${item.name}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\\'http://www.w3.org/2000/svg\\\' width=\\\'260\\\' height=\\\'200\\\' style=\\\'background:%23f1f5f9;\\\'%3E%3Ctext x=\\\'50%25\\\' y=\\\'50%25\\\' dominant-baseline=\\\'middle\\\' text-anchor=\\\'middle\\\' fill=\\\'%2394a3b8\\\'%3Eصورة غير متوفرة%3C/text%3E%3C/svg%3E'">
+                            <!-- تم إصلاح شفرة الصورة البديلة (SVG) هنا -->
+                            <img src="${item.img}" alt="${item.name}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22260%22 height=%22200%22 style=%22background:%23f1f5f9;%22%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%2394a3b8%22%3Eصورة غير متوفرة%3C/text%3E%3C/svg%3E'">
                         </div>
                         <div class="item-info">
                             <div>
@@ -719,7 +725,8 @@
                 grid.innerHTML += `
                     <div class="item" style="animation-delay: ${animationDelay}s;">
                         <div class="item-img-wrap">
-                            <img src="${item.img}" alt="${item.name}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\\'http://www.w3.org/2000/svg\\\' width=\\\'260\\\' height=\\\'200\\\' style=\\\'background:%23f1f5f9;\\\'%3E%3Ctext x=\\\'50%25\\\' y=\\\'50%25\\\' dominant-baseline=\\\'middle\\\' text-anchor=\\\'middle\\\' fill=\\\'%2394a3b8\\\'%3Eصورة غير متوفرة%3C/text%3E%3C/svg%3E'">
+                            <!-- تم إصلاح شفرة الصورة البديلة (SVG) هنا أيضاً -->
+                            <img src="${item.img}" alt="${item.name}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22260%22 height=%22200%22 style=%22background:%23f1f5f9;%22%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%2394a3b8%22%3Eصورة غير متوفرة%3C/text%3E%3C/svg%3E'">
                         </div>
                         <div class="item-info">
                             <div>
@@ -755,7 +762,6 @@
                 resultsTitle.classList.add('visible');
                 termDisplay.textContent = term;
                 
-                // إزالة التفعيل من كل التبويبات عند البحث
                 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
 
                 const allItems = [];
@@ -774,7 +780,6 @@
             clearBtn.addEventListener('click', function() {
                 searchInput.value = '';
                 clearSearch();
-                // إعادة تفعيل التبويب الحالي
                 const tabs = document.querySelectorAll('.tab-btn');
                 if(tabs[currentTabIndex]) tabs[currentTabIndex].classList.add('active');
             });
@@ -793,6 +798,12 @@
             if (existingItem) existingItem.qty++;
             else cart.push({ id, name, price, qty: 1 });
             saveCart();
+
+            // إضافة تأثير النبض للسلة العائمة لجذب الانتباه
+            const cartBar = document.getElementById('cart-bar');
+            cartBar.classList.remove('pulse-anim');
+            void cartBar.offsetWidth; // إعادة تهيئة الـ DOM للسماح بتشغيل التأثير مجدداً
+            cartBar.classList.add('pulse-anim');
         };
 
         window.updateQty = function(id, delta) {
@@ -862,6 +873,7 @@
             });
         }
 
+        // تم إصلاح دالة إرسال الطلب وإضافة دالة التشفير وتفريغ السلة
         function sendOrder() {
             const customerNameInput = document.getElementById('customer-name');
             const customerName = customerNameInput.value.trim();
@@ -872,19 +884,28 @@
                 return;
             }
             if (cart.length === 0) return;
-            let message = `*🍽️ طلب جديد من مطعم الريان*%0A`;
-            message += `*العميل:* ${customerName}%0A`;
-            message += `---------------------------%0A`;
+
+            let message = `*🍽️ طلب جديد من مطعم الريان*\n`;
+            message += `*العميل:* ${customerName}\n`;
+            message += `---------------------------\n`;
             let total = 0;
             cart.forEach(item => {
                 const subtotal = item.price * item.qty;
-                message += `▪️ ${item.qty} × ${item.name} = ${subtotal.toLocaleString()} ر.ي%0A`;
+                message += `▪️ ${item.qty} × ${item.name} = ${subtotal.toLocaleString()} ر.ي\n`;
                 total += subtotal;
             });
-            message += `---------------------------%0A`;
-            message += `*💰 الإجمالي النهائي: ${total.toLocaleString()} ر.ي*%0A`;
+            message += `---------------------------\n`;
+            message += `*💰 الإجمالي النهائي: ${total.toLocaleString()} ر.ي*\n`;
             message += `الرجاء تأكيد استلام الطلب، شكراً لكم!`;
-            window.open(`https://wa.me/${restaurantPhone}?text=${message}`, '_blank');
+
+            // تشفير الرسالة لضمان وصولها بشكل سليم عبر الواتساب
+            const encodedMessage = encodeURIComponent(message);
+            window.open(`https://wa.me/${restaurantPhone}?text=${encodedMessage}`, '_blank');
+            
+            // تفريغ السلة تلقائياً بعد إرسال الطلب بنجاح
+            cart = [];
+            saveCart();
+            closeModal();
         }
 
         document.getElementById('cart-toggle').addEventListener('click', openModal);
