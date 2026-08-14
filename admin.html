@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم مطعم الريان</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+        body { background: #f8fafc; }
+
+        /* ---------- شاشة تسجيل الدخول ---------- */
+        #login-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(14, 26, 53, 0.97);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(5px);
+        }
+        .login-box {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 25px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+        }
+        .login-box h2 {
+            color: #0e1a35;
+            margin-bottom: 10px;
+            font-size: 24px;
+            font-weight: 900;
+        }
+        .login-box p {
+            color: #64748b;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+        .login-box input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            font-size: 18px;
+            text-align: center;
+            margin-bottom: 20px;
+            outline: none;
+            transition: 0.3s;
+        }
+        .login-box input:focus {
+            border-color: #c5a02a;
+            box-shadow: 0 0 0 4px rgba(197, 160, 42, 0.15);
+        }
+        .login-box button {
+            background: #0e1a35;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 15px;
+            font-weight: 800;
+            font-size: 18px;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.3s;
+        }
+        .login-box button:hover {
+            background: #1e3a8a;
+        }
+        .login-error {
+            color: #ef4444;
+            font-weight: 700;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* ---------- لوحة التحكم ---------- */
+        .container {
+            max-width: 900px;
+            margin: auto;
+            padding: 20px;
+        }
+        .header {
+            background: #0e1a35;
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .header h1 { font-size: 24px; }
+        .section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .section h2 {
+            color: #0e1a35;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .item-row:last-child { border-bottom: none; }
+        .item-name { font-weight: 700; color: #1e293b; flex: 1; }
+        .item-desc { font-size: 12px; color: #64748b; }
+        .price-input {
+            width: 100px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            text-align: center;
+        }
+        .btn-save {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 800;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .btn-save:hover { filter: brightness(1.1); }
+        .btn-copy {
+            background: #0e1a35;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
+        .notice {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- شاشة تسجيل الدخول -->
+    <div id="login-overlay">
+        <div class="login-box">
+            <h2>🔐 دخول المشرف</h2>
+            <p>هذه الصفحة مخصصة لإدارة المطعم فقط</p>
+            <input type="password" id="admin-password" placeholder="كلمة المرور">
+            <button onclick="checkPassword()">دخول</button>
+            <div class="login-error" id="login-error">❌ كلمة المرور غير صحيحة</div>
+        </div>
+    </div>
+
+    <!-- محتوى لوحة التحكم (يظهر بعد الدخول) -->
+    <div class="container" id="admin-content" style="display: none;">
+        <div class="header">
+            <h1>🍽️ لوحة تحكم أسعار مطعم الريان</h1>
+        </div>
+
+        <div class="notice">
+            ⚠️ <strong>طريقة الاستخدام:</strong> عدّل الأسعار ثم اضغط حفظ. سيتم تنزيل ملف <code>menu.json</code> المعدّل على جهازك. ارفعه إلى مستودع GitHub (نفس مكان الملف القديم) ليتم تحديث الموقع للزوار.
+        </div>
+
+        <div id="content">
+            <p style="text-align:center; color:#64748b;">جاري تحميل البيانات...</p>
+        </div>
+
+        <button class="btn-save" id="save-btn" style="display:none;">💾 حفظ وتنزيل menu.json</button>
+        <button class="btn-copy" id="copy-btn" style="display:none;">📋 نسخ كود JSON للحافظة</button>
+    </div>
+
+    <script>
+        // ⚠️ ضع كلمة المرور هنا (يمكنك تغييرها لاحقاً)
+        const ADMIN_PASSWORD = "hussein"; // <--- غيّرها قبل رفع الملف
+
+        let menuData = [];
+
+        // تسجيل الدخول
+        function checkPassword() {
+            const input = document.getElementById('admin-password');
+            const error = document.getElementById('login-error');
+            if (input.value === ADMIN_PASSWORD) {
+                sessionStorage.setItem('admin_logged_in', 'true');
+                showAdminPanel();
+            } else {
+                error.style.display = 'block';
+                input.value = '';
+                input.focus();
+            }
+        }
+
+        function showAdminPanel() {
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('admin-content').style.display = 'block';
+            loadMenu();
+        }
+
+        // التحقق التلقائي من الجلسة
+        if (sessionStorage.getItem('admin_logged_in') === 'true') {
+            showAdminPanel();
+        }
+
+        // جلب البيانات
+        async function loadMenu() {
+            try {
+                const res = await fetch('menu.json');
+                if (!res.ok) throw new Error('menu.json غير موجود');
+                menuData = await res.json();
+                renderForm(menuData);
+            } catch (err) {
+                document.getElementById('content').innerHTML = `<p style="text-align:center; color:red;">تعذر تحميل menu.json. تأكد أن الملف موجود في نفس المجلد.</p>`;
+            }
+        }
+
+        function renderForm(data) {
+            const container = document.getElementById('content');
+            container.innerHTML = '';
+
+            data.forEach((cat, catIdx) => {
+                const section = document.createElement('div');
+                section.className = 'section';
+                section.innerHTML = `<h2>${cat.category}</h2>`;
+
+                const itemsDiv = document.createElement('div');
+                cat.items.forEach((item, itemIdx) => {
+                    const row = document.createElement('div');
+                    row.className = 'item-row';
+                    row.innerHTML = `
+                        <div>
+                            <div class="item-name">${item.name}</div>
+                            <div class="item-desc">${item.desc || ''}</div>
+                        </div>
+                        <input type="number" class="price-input" data-cat="${catIdx}" data-item="${itemIdx}" value="${item.price}" step="0.5" min="0">
+                    `;
+                    itemsDiv.appendChild(row);
+                });
+
+                section.appendChild(itemsDiv);
+                container.appendChild(section);
+            });
+
+            document.getElementById('save-btn').style.display = 'block';
+            document.getElementById('copy-btn').style.display = 'block';
+        }
+
+        function collectData() {
+            menuData.forEach((cat, catIdx) => {
+                cat.items.forEach((item, itemIdx) => {
+                    const input = document.querySelector(`.price-input[data-cat="${catIdx}"][data-item="${itemIdx}"]`);
+                    if (input) {
+                        item.price = parseFloat(input.value) || 0;
+                    }
+                });
+            });
+            return menuData;
+        }
+
+        function downloadJson(data) {
+            const jsonStr = JSON.stringify(data, null, 4);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'menu.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function copyJson(data) {
+            const jsonStr = JSON.stringify(data, null, 4);
+            navigator.clipboard.writeText(jsonStr).then(() => {
+                alert('تم نسخ JSON بنجاح');
+            }).catch(() => {
+                alert('تعذر النسخ. انسخ يدوياً من الكونسول.');
+            });
+        }
+
+        document.getElementById('save-btn').addEventListener('click', () => {
+            const updated = collectData();
+            downloadJson(updated);
+            alert('تم تجهيز الملف! ارفعه إلى GitHub في نفس مجلد menu.json.');
+        });
+
+        document.getElementById('copy-btn').addEventListener('click', () => {
+            const updated = collectData();
+            copyJson(updated);
+        });
+    </script>
+</body>
+</html>
