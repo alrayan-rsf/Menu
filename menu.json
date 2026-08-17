@@ -1,615 +1,480 @@
-[
-    {
-        "category": "عروض الريان",
-        "items": [
-            {
-                "id": 1786844096765,
-                "name":  "واحد لحم + واحد الرز +شراب",
-                "desc": "نص كيلو لحم + رز + علبة شراب",
-                "price": 15000,
-                "img": "images/لحم مع الرز.jpg"
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم مطعم الريان - النسخة الشاملة</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+        body { background: #f8fafc; padding: 20px; }
+
+        #login-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(14, 26, 53, 0.97);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999;
+        }
+        .login-box {
+            background: white; padding: 40px 30px; border-radius: 25px;
+            width: 90%; max-width: 400px; text-align: center;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+        }
+        .login-box h2 { color: #0e1a35; margin-bottom: 10px; font-size: 24px; font-weight: 900; }
+        .login-box p { color: #64748b; margin-bottom: 25px; font-size: 14px; }
+        .login-box input {
+            width: 100%; padding: 15px; border: 2px solid #e2e8f0;
+            border-radius: 15px; font-size: 18px; text-align: center;
+            margin-bottom: 20px; outline: none; transition: 0.3s;
+        }
+        .login-box input:focus { border-color: #c5a02a; box-shadow: 0 0 0 4px rgba(197, 160, 42, 0.15); }
+        .login-box button {
+            background: #0e1a35; color: white; border: none;
+            padding: 15px; border-radius: 15px; font-weight: 800;
+            font-size: 18px; cursor: pointer; width: 100%;
+        }
+        .login-error { color: #ef4444; font-weight: 700; margin-top: 10px; display: none; }
+
+        .container { max-width: 1100px; margin: auto; }
+        .header { background: #0e1a35; color: white; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 25px; }
+        .header h1 { font-size: 24px; }
+        .notice { background: #fef3c7; border: 1px solid #f59e0b; padding: 15px; border-radius: 10px; margin-bottom: 20px; font-size: 14px; line-height: 1.6; }
+        .file-area { background: white; border: 2px dashed #cbd5e1; border-radius: 15px; padding: 40px; text-align: center; margin-bottom: 20px; cursor: pointer; transition: 0.3s; }
+        .file-area:hover { border-color: #c5a02a; background: #fffbeb; }
+        .file-area input { display: none; }
+
+        .ticker-section { background: white; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .ticker-section h2 { color: #0e1a35; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px; }
+        .ticker-input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 15px; font-weight: 600; }
+
+        .section { background: white; border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .section-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px; }
+        .section-header .category-name-input {
+            padding: 8px 12px; border: 1px solid #ddd; border-radius: 10px;
+            font-size: 18px; font-weight: 700; color: #0e1a35;
+            width: 60%;
+        }
+        .section-header .actions { display: flex; gap: 5px; }
+        .btn-move { background: #e2e8f0; border: none; width: 35px; height: 35px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        .btn-move:hover { background: #cbd5e1; }
+        .btn-delete-category { background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: 700; }
+
+        .item-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 15px 0; border-bottom: 1px solid #f1f5f9; }
+        .item-row:last-child { border-bottom: none; }
+        .item-fields { display: flex; flex-wrap: wrap; gap: 10px; flex: 1; }
+        .item-fields input[type="text"], .item-fields input[type="number"] {
+            padding: 10px; border: 1px solid #ddd; border-radius: 10px;
+            font-size: 14px; font-weight: 700; width: 180px;
+        }
+        .item-fields .desc-input { width: 250px; }
+        .item-fields .img-input { width: 250px; }
+        .img-preview { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; border: 1px solid #ddd; }
+        .btn-delete-item { background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: 700; }
+        .btn-add-item { background: #e2e8f0; color: #0e1a35; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 700; margin-top: 10px; }
+        .btn-add-item:hover { background: #cbd5e1; }
+        .item-move-btns { display: flex; gap: 5px; }
+
+        .btn-save { background: #10b981; color: white; border: none; padding: 15px 30px; border-radius: 12px; font-size: 18px; font-weight: 800; cursor: pointer; width: 100%; margin-top: 20px; }
+        .btn-copy { background: #0e1a35; color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; margin-top: 10px; width: 100%; }
+        .btn-add-category { background: #0e1a35; color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; margin-top: 20px; width: 100%; }
+        .save-status { text-align: center; margin-top: 15px; font-weight: 700; color: #10b981; display: none; }
+
+        .input-error {
+            border-color: #ef4444 !important;
+            background: #fef2f2 !important;
+        }
+        .error-message {
+            color: #ef4444;
+            font-weight: 700;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- شاشة الدخول -->
+    <div id="login-overlay">
+        <div class="login-box">
+            <h2>🔐 دخول المشرف</h2>
+            <p>لوحة التحكم الشاملة</p>
+            <input type="password" id="admin-password" placeholder="كلمة المرور">
+            <button onclick="checkPassword()">دخول</button>
+            <div class="login-error" id="login-error">❌ كلمة المرور غير صحيحة</div>
+        </div>
+    </div>
+
+    <!-- محتوى اللوحة -->
+    <div class="container" id="admin-content" style="display: none;">
+        <div class="header">
+            <h1>🍽️ لوحة تحكم مطعم الريان الشاملة</h1>
+        </div>
+
+        <div class="notice">
+            ⚠️ <strong>طريقة الاستخدام:</strong> اختر ملف <code>menu.json</code> من جهازك، عدّل الأصناف والأقسام بحرية، ثم اضغط حفظ لتنزيل الملف المعدّل وارفعه إلى GitHub.
+            <br>📌 لتعديل صورة صنف: ضع رابط الصورة (مثل <code>images/shawarma.jpg</code>) أو رابط خارجي، وسيتم عرض معاينة.
+            <br>✅ <strong>ميزة الحفظ التلقائي:</strong> يتم حفظ تعديلاتك تلقائياً في هذا المتصفح. إذا أغلقت الصفحة بالخطأ، افتحها مرة أخرى وستستعيد بياناتك.
+            <br>⚠️ <strong>تحذير:</strong> لن يتم الحفظ أو التنزيل إذا وُجد سعر فارغ.
+        </div>
+
+        <label class="file-area" id="file-area">
+            📂 <strong>اضغط هنا لاختيار ملف menu.json من جهازك</strong>
+            <input type="file" id="file-input" accept=".json">
+        </label>
+
+        <!-- قسم شريط الأخبار -->
+        <div class="ticker-section" id="ticker-section" style="display:none;">
+            <h2>📰 شريط الأخبار</h2>
+            <input type="text" id="ticker-text" class="ticker-input" placeholder="اكتب نص الشريط هنا...">
+        </div>
+
+        <div id="content" style="display:none;"></div>
+
+        <button class="btn-add-category" id="add-category-btn" style="display:none;">➕ إضافة قسم جديد</button>
+        <button class="btn-save" id="save-btn" style="display:none;">💾 حفظ وتنزيل menu.json</button>
+        <button class="btn-copy" id="copy-btn" style="display:none;">📋 نسخ كود JSON للحافظة</button>
+        <div class="save-status" id="save-status">✅ تم الحفظ تلقائياً في المتصفح</div>
+        <div class="error-message" id="error-message">⚠️ لا يمكن الحفظ: توجد خانات سعر فارغة. الرجاء تعبئة جميع الأسعار.</div>
+    </div>
+
+    <script>
+        // كلمة المرور
+        const ADMIN_PASSWORD = "hussein";
+        const STORAGE_KEY = 'rayyan_admin_autosave';
+
+        function checkPassword() {
+            const input = document.getElementById('admin-password');
+            const error = document.getElementById('login-error');
+            if (input.value === ADMIN_PASSWORD) {
+                sessionStorage.setItem('rayyan_admin_logged', 'true');
+                showAdminPanel();
+            } else {
+                error.style.display = 'block';
+                input.value = '';
+                input.focus();
             }
-        ]
-    },
-    {
-        "category": "المأكولات البحرية",
-        "items": [
-            {
-                "id": 501,
-                "name": "جمبري بروست",
-                "price": 10000,
-                "img": "images/جمبري بروست.jpg",
-                "desc": "جمبري جامبو طازج مقرمش+ شبس+ ثوم وصوص+ سلطة ديكور+ ثلاث حبات خبز"
-            },
-            {
-                "id": 502,
-                "name": "لخم بروست",
-                "price": 4500,
-                "img": "images/لخم بروست.jpg",
-                "desc": "اصابع لخم بروست مقلية ومقرمة+ شبسوسلطة ديكور بالاضافة لعلبة صوص وثوم وثلاثة أرغفة"
-            },
-            {
-                "id": 503,
-                "name": "بنجيز بروست",
-                "desc": "اصابع بنجيز مقلية بروست+ شبسوسلطة ديكور بالاضافة لعلبة صوص وثوم وثلاثة أرغفة",
-                "price": 6500,
-                "img": "images/بنجيز بروست.jpg"
-            },
-            {
-                "id": 1786840472278,
-                "name": "صيادية سمك ديرك",
-                "desc": "سمك ديرك طازج مع رز مرشوش بصوص لذيذ",
-                "price": 8000,
-                "img": "images/صيادية.jpg"
-            },
-            {
-                "id": 1786840584428,
-                "name": "صيادية ثمــد",
-                "desc": "سمك التونة طازج مع رز مرشوش بصوص لذيذ",
-                "price": 7000,
-                "img": "images/صيادية.jpg"
-            },
-            {
-                "id": 1786840727616,
-                "name": "طفاية سمك ديرك",
-                "desc": "سمك ديرك طازج مع الصوص اللذيذ وثلاث حبات رغيف",
-                "price": 7000,
-                "img": "images/طفاية سمك.jpg"
-            },
-            {
-                "id": 1786840911622,
-                "name": "طفاية ثمــد",
-                "desc": "سمك التونة طازج مع الصوص اللذيذ وثلاث حبات رغيف",
-                "price": 6000,
-                "img": "images/طفاية سمك.jpg"
-            },
-            {
-                "id": 1786841000570,
-                "name": "سمك ثمــد مقلي",
-                "desc": "قطعتين من سمك التونة مقرمشة مع شبس وسلطة ديكور بالاضافة لعلبة صوص وثوم وثلاثة أرغفة",
-                "price": 6000,
-                "img": "images/سمك ثمد مقلي.jpg"
-            },
-            {
-                "id": 1786841219216,
-                "name": "سمك ثمــد مشوي",
-                "desc": "قطعتين من سمك التونة مشوية + شبس وسلطة ديكور بالاضافة لعلبة صوص وثوم وثلاثة أرغفة",
-                "price": 6000,
-                "img": "images/سمك ثمد مقلي.jpg"
-            },
-            {
-                "id": 1786841343199,
-                "name": "سمك ديرك بروست",
-                "desc": "سمك ديرك طازج مقرمش وشبس وسلطة ديكور بالاضافة لعلبة صوص وثوم وثلاثة أرغفة",
-                "price": 8000,
-                "img": "images/سمك ديرك بروست.jpg"
-            },
-            {
-                "id": 1786842020344,
-                "name": "سمك ديرك مشوي",
-                "desc": "سمك ديرك طازج مشوي على الجريل + شبس وسلطة ديكور بالاضافة لعلبة صوص وثوم وثلاثة أرغفة",
-                "price": 8000,
-                "img": "images/سمك ديرك مشوي.jpg"
-            },
-            {
-                "id": 1786842153089,
-                "name": "شوربة جمبري",
-                "desc": "شوربة جمبري طازج ولذيذة",
-                "price": 6000,
-                "img": "images/شوربة جمبري.jpg"
-            },
-            {
-                "id": 1786842249509,
-                "name": "جمبري مشوي",
-                "desc": "جمبري حجم كبير جامبو طازج مشوي على الجريل + شبس+ ثوم وصوص+ سلطة ديكور+ ثلاث حبات خبز ",
-                "price": 10000,
-                "img": "images/جمبري مشوي.jpg"
-            },
-            {
-                "id": 1786842395369,
-                "name": "جمبري صوص",
-                "desc": "جمبري طازج مع الصوص اللذيذ وثلاث حبات رغيف",
-                "price": 10000,
-                "img": "images/جمبري صوص.jpg"
-            },
-            {
-                "id": 1786842526240,
-                "name": "طبـق بحـري",
-                "desc": "قطعة سمك+ جمبري+ اصابع لخم+ اصابع بنجيز+ قفيعة+ شبس+ جبن مبشور+ شوربة بحري+ ثوم وصوص+ سلطة ديكور+ خبز",
-                "price": 36000,
-                "img": "images/طبق بحري.jpg"
-            },
-            {
-                "id": 1786951497550,
-                "name": "مكرونة بالجمبري",
-                "desc": "",
-                "price": 11000,
-                "img": "images/مكرونة بالجمبري.jpg"
+        }
+
+        function showAdminPanel() {
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('admin-content').style.display = 'block';
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    menuData = JSON.parse(saved);
+                    if (Array.isArray(menuData)) {
+                        tickerText = '';
+                        renderForm(menuData);
+                    } else if (menuData && typeof menuData === 'object') {
+                        tickerText = menuData.ticker_text || '';
+                        renderForm(menuData.categories || []);
+                    }
+                    showStatus('✅ تم استعادة آخر جلسة محفوظة تلقائياً');
+                    return;
+                } catch(e) {}
             }
-        ]
-    },
-    {
-        "category": "المشويات",
-        "items": [
-            {
-                "id": 101,
-                "name": "شيش طاووق",
-                "desc": "قطع دجاج متبلة مشوية على الفحم",
-                "price": 4500,
-                "img": "images/shish_tawook.jpg"
-            },
-            {
-                "id": 102,
-                "name": "مشاوي مشكلة",
-                "desc": "أسياخ دجاج ولحم مع أرز ومقبلات",
-                "price": 18000,
-                "img": "images/mixed_grill.jpg"
-            },
-            {
-                "id": 103,
-                "name": "سكالوب",
-                "price": 4500,
-                "img": "images/اسكالوب.jpg"
-            },
-            {
-                "id": 1786844361602,
-                "name": "برجر دجاج",
-                "desc": "خبزة برجر مع السمسم محشوة بشريحة دجاج مع الجبن السليس والبيض والسلطة",
-                "price": 2200,
-                "img": "images/برجر دجاج.jpg"
-            },
-            {
-                "id": 1786844513283,
-                "name": "برجر لحم",
-                "desc": "خبزة برجر مع السمسم محشوة بشريحة لحم بلدي مع الجبن السليس والبيض والسلطة",
-                "price": 2500,
-                "img": "images/برجر لحم.jpg"
-            },
-            {
-                "id": 1786844637124,
-                "name": "كباب دجاج",
-                "desc": "ثلاثة أسياخ كباب دجاج مع الشبس والثوم والصوص وسلطة ديكور ورغيف",
-                "price": 5000,
-                "img": "images/كباب.jpg"
-            },
-            {
-                "id": 1786944477086,
-                "name": "مسحب لبناني",
-                "desc": "",
-                "price": 4800,
-                "img": "images/مسحب لبناني.jpg"
-            },
-            {
-                "id": 1786844727357,
-                "name": "كباب لحم",
-                "desc": "ثلاثة أسياخ كباب لحم بلدي مع الشبس والثوم والصوص وسلطة ديكور ورغيف",
-                "price": 6500,
-                "img": "images/كباب.jpg"
-            },
-            {
-                "id": 1786944528271,
-                "name": "كفتة خشخاش",
-                "desc": "",
-                "price": 6500,
-                "img": "images/كفتة خشخاش.jpg"
+            showStatus('');
+        }
+
+        if (sessionStorage.getItem('rayyan_admin_logged') === 'true') {
+            showAdminPanel();
+        }
+
+        let menuData = [];        // الأقسام فقط
+        let tickerText = '';      // نص شريط الأخبار
+
+        const fileInput = document.getElementById('file-input');
+        fileInput.addEventListener('change', handleFileSelect);
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (Array.isArray(parsed)) {
+                        // البنية القديمة (مصفوفة أقسام فقط)
+                        menuData = parsed;
+                        tickerText = '';
+                    } else if (parsed && typeof parsed === 'object' && parsed.categories) {
+                        // البنية الجديدة (كائن يحتوي على ticker_text و categories)
+                        menuData = parsed.categories;
+                        tickerText = parsed.ticker_text || '';
+                    } else {
+                        alert('الملف غير صالح');
+                        return;
+                    }
+                    renderForm(menuData);
+                } catch (error) {
+                    alert('عذراً، الملف ليس JSON صحيح أو بنيته غير سليمة.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function renderForm(data) {
+            const container = document.getElementById('content');
+            container.innerHTML = '';
+            container.style.display = 'block';
+
+            // إظهار قسم الشريط
+            document.getElementById('ticker-section').style.display = 'block';
+            document.getElementById('ticker-text').value = tickerText;
+            document.getElementById('ticker-text').addEventListener('input', function() {
+                tickerText = this.value;
+                autoSave();
+            });
+
+            // عرض الأقسام
+            data.forEach((cat, catIdx) => {
+                const section = document.createElement('div');
+                section.className = 'section';
+
+                const header = document.createElement('div');
+                header.className = 'section-header';
+                header.innerHTML = `
+                    <input type="text" class="category-name-input" value="${cat.category}" data-cat-index="${catIdx}" placeholder="اسم القسم">
+                    <div class="actions">
+                        <button class="btn-move" onclick="moveCategory(${catIdx}, -1)" title="تحريك لأعلى">▲</button>
+                        <button class="btn-move" onclick="moveCategory(${catIdx}, 1)" title="تحريك لأسفل">▼</button>
+                        <button class="btn-delete-category" onclick="deleteCategory(${catIdx})">🗑️ حذف</button>
+                    </div>
+                `;
+                section.appendChild(header);
+
+                const nameInput = header.querySelector('.category-name-input');
+                nameInput.addEventListener('input', function() {
+                    menuData[catIdx].category = this.value;
+                    autoSave();
+                });
+
+                const itemsDiv = document.createElement('div');
+                itemsDiv.className = 'items-container';
+
+                cat.items.forEach((item, itemIdx) => {
+                    itemsDiv.appendChild(createItemRow(catIdx, itemIdx, item));
+                });
+
+                section.appendChild(itemsDiv);
+
+                const addItemBtn = document.createElement('button');
+                addItemBtn.className = 'btn-add-item';
+                addItemBtn.textContent = `➕ إضافة صنف إلى ${cat.category}`;
+                addItemBtn.onclick = () => addItem(catIdx);
+                section.appendChild(addItemBtn);
+
+                container.appendChild(section);
+            });
+
+            document.getElementById('save-btn').style.display = 'block';
+            document.getElementById('copy-btn').style.display = 'block';
+            document.getElementById('add-category-btn').style.display = 'block';
+        }
+
+        function createItemRow(catIdx, itemIdx, item) {
+            const row = document.createElement('div');
+            row.className = 'item-row';
+            row.innerHTML = `
+                <div class="item-fields">
+                    <input type="text" placeholder="اسم الصنف" value="${item.name}" data-field="name" data-cat="${catIdx}" data-item="${itemIdx}">
+                    <input type="text" placeholder="الوصف" class="desc-input" value="${item.desc || ''}" data-field="desc" data-cat="${catIdx}" data-item="${itemIdx}">
+                    <input type="number" placeholder="السعر" value="${item.price !== null && item.price !== undefined ? item.price : ''}" data-field="price" data-cat="${catIdx}" data-item="${itemIdx}" step="0.5" min="0">
+                    <input type="text" placeholder="رابط الصورة" class="img-input" value="${item.img || ''}" data-field="img" data-cat="${catIdx}" data-item="${itemIdx}" oninput="updatePreview(this)">
+                </div>
+                <img src="${item.img || ''}" class="img-preview" onerror="this.style.display='none'">
+                <div class="item-move-btns">
+                    <button class="btn-move" onclick="moveItem(${catIdx}, ${itemIdx}, -1)" title="تحريك لأعلى">▲</button>
+                    <button class="btn-move" onclick="moveItem(${catIdx}, ${itemIdx}, 1)" title="تحريك لأسفل">▼</button>
+                </div>
+                <button class="btn-delete-item" onclick="deleteItem(${catIdx}, ${itemIdx})">🗑️</button>
+            `;
+
+            row.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', () => {
+                    const field = input.dataset.field;
+                    const cat = parseInt(input.dataset.cat);
+                    const item = parseInt(input.dataset.item);
+                    if (field === 'price') {
+                        const priceValue = input.value.trim();
+                        if (priceValue === '') {
+                            menuData[cat].items[item].price = null;
+                            input.classList.add('input-error');
+                        } else {
+                            menuData[cat].items[item].price = parseFloat(priceValue) || 0;
+                            input.classList.remove('input-error');
+                        }
+                    } else {
+                        menuData[cat].items[item][field] = input.value;
+                    }
+                    if (validatePrices()) {
+                        autoSave();
+                        hideError();
+                    } else {
+                        showError();
+                    }
+                });
+            });
+
+            const priceInput = row.querySelector('input[data-field="price"]');
+            if (priceInput && (item.price === null || item.price === undefined || item.price === '')) {
+                priceInput.classList.add('input-error');
             }
-        ]
-    },
-    {
-        "category": "المقبلات",
-        "items": [
-            {
-                "id": 201,
-                "name": "حمص",
-                "desc": "حمص مع زيت زيتون وبقدونس",
-                "price": 1900,
-                "img": "images/hummus.jpg"
-            },
-            {
-                "id": 202,
-                "name": "متبل",
-                "desc": "باذنجان مشوي مع طحينة",
-                "price": 1900,
-                "img": "images/moutabal.jpg"
-            },
-            {
-                "id": 1786840112516,
-                "name": "سلطة فتوش",
-                "desc": "",
-                "price": 2000,
-                "img": "images/سلطة فتوش.jpg"
-            },
-            {
-                "id": 1786840161751,
-                "name": "سلطة تبولة",
-                "desc": "",
-                "price": 2000,
-                "img": "images/سلطة تبولة.jpg"
-            },
-            {
-                "id": 1786944611744,
-                "name": "سلطة جرجير",
-                "desc": "",
-                "price": 1500,
-                "img": "images/سلطة جرجير.jpg"
-            },
-            {
-                "id": 1786944649106,
-                "name": "سلطة شرائح",
-                "desc": "طماط، خيار، بصل، جزر، بيبر",
-                "price": 1500,
-                "img": "images/سلطة شرائح.jpg"
-            },
-            {
-                "id": 1786944715382,
-                "name": "سلطة ناعم",
-                "desc": "",
-                "price": 1500,
-                "img": "images/سلطة ناعم.jpg"
-            },
-            {
-                "id": 1786944778559,
-                "name": "سحاوق جبن",
-                "desc": "",
-                "price": 1500,
-                "img": "images/سحاوق جبن.jpg"
+
+            return row;
+        }
+
+        function updatePreview(input) {
+            const row = input.closest('.item-row');
+            const img = row.querySelector('.img-preview');
+            img.src = input.value;
+            img.style.display = 'block';
+        }
+
+        function addItem(catIdx) {
+            const newItem = {
+                id: Date.now(),
+                name: '',
+                desc: '',
+                price: null,
+                img: ''
+            };
+            menuData[catIdx].items.push(newItem);
+            renderForm(menuData);
+            showError();
+        }
+
+        function deleteItem(catIdx, itemIdx) {
+            if (confirm('هل تريد حذف هذا الصنف؟')) {
+                menuData[catIdx].items.splice(itemIdx, 1);
+                renderForm(menuData);
+                if (validatePrices()) autoSave();
+                else showError();
             }
-        ]
-    },
-    {
-        "category": "الدجاج والأرز والمشكلات",
-        "items": [
-            {
-                "id": 301,
-                "name": "دجاج بروست",
-                "price": 3500,
-                "img": "images/بروست دجاج.jpg",
-                "desc": "قطعتين دجاج مقرمش، شبس، ثوم، صوص، سلطة مايونيز، وثلاثة أرغفة"
-            },
-            {
-                "id": 403,
-                "name": "ربع دجاج عالفحم",
-                "price": 2000,
-                "img": "images/دجاج فحم.jpg",
-                "desc": "ربع دجاج مشوي على الفحم + شبس وسلطة ديكور"
-            },
-            {
-                "id": 402,
-                "name": "ربع دجاج شواية",
-                "desc": "ربع دجاج مشوية + شبس وسلطة ديكور",
-                "price": 2000,
-                "img": "images/دجاج شواية.jpg"
-            },
-            {
-                "id": 1786945012025,
-                "name": "برياني دجاج",
-                "desc": "ارز برياني مع ربع دجاج",
-                "price": 4600,
-                "img": "images/برياني دجاج.jpg"
-            },
-            {
-                "id": 1786945055631,
-                "name": "عقدة دجاج",
-                "desc": "",
-                "price": 4600,
-                "img": "images/عقدة دجاج.jpg"
-            },
-            {
-                "id": 1786945146516,
-                "name": "مكرونة بالدجاج",
-                "desc": "",
-                "price": 4600,
-                "img": "images/مكرونة بالدجاج.jpg"
-            },
-            {
-                "id": 1786945201484,
-                "name": "مكرونة برياني",
-                "desc": "",
-                "price": 2000,
-                "img": "images/مكرونة برياني.jpg"
-            },
-            {
-                "id": 1786945232045,
-                "name": "مكرونة بالتونة",
-                "desc": "",
-                "price": 4600,
-                "img": "images/مكرونة بالتونة.jpg"
-            },
-            {
-                "id": 1786945327570,
-                "name": "مضغوط دجاج",
-                "desc": "ارز مضغوط مع ربع دجاج وسحاوق",
-                "price": 3600,
-                "img": "images/مضغوط دجاج.jpg"
-            },
-            {
-                "id": 1786945588111,
-                "name": "أرز مضغوط سادة",
-                "desc": "",
-                "price": 1600,
-                "img": "images/ارز مضغوط.jpg"
-            },
-            {
-                "id": 1786945740297,
-                "name": "أرز صيني",
-                "desc": "",
-                "price": 2000,
-                "img": "images/ارز صيني.jpg"
-            },
-            {
-                "id": 1786945772858,
-                "name": "أرز بشاور",
-                "desc": "رز بشاور مع الزبيب والمكسرات",
-                "price": 1600,
-                "img": "images/ارز بشاور.jpg"
-            },
-            {
-                "id": 1786945842816,
-                "name": "أرز مندي",
-                "desc": "أرز مندي فاخر",
-                "price": 1600,
-                "img": "images/ارز مندي.jpg"
-            },
-            {
-                "id": 1786945955232,
-                "name": "مشكل خضار",
-                "desc": "طبيخ مشكل خضار ",
-                "price": 1600,
-                "img": "images/مشكل خضار.jpg"
-            },
-            {
-                "id": 1786946001969,
-                "name": "مشكل فرن",
-                "desc": "",
-                "price": 1600,
-                "img": "images/مشكل فرن.jpg"
-            },
-            {
-                "id": 1786946064255,
-                "name": "ملوخيـة",
-                "desc": "ملوخية بالدجاج",
-                "price": 1600,
-                "img": "images/ملوخية.jpg"
+        }
+
+        function moveItem(catIdx, itemIdx, direction) {
+            const items = menuData[catIdx].items;
+            const newIndex = itemIdx + direction;
+            if (newIndex < 0 || newIndex >= items.length) return;
+            [items[itemIdx], items[newIndex]] = [items[newIndex], items[itemIdx]];
+            renderForm(menuData);
+            if (validatePrices()) autoSave();
+            else showError();
+        }
+
+        function deleteCategory(catIdx) {
+            if (confirm('هل تريد حذف هذا القسم بالكامل؟')) {
+                menuData.splice(catIdx, 1);
+                renderForm(menuData);
+                if (validatePrices()) autoSave();
+                else showError();
             }
-        ]
-    },
-    {
-        "category": "قسم اللحوم",
-        "items": [
-            {
-                "id": 1786843598670,
-                "name": "لحم حنيذ",
-                "desc": "نص كيلو لحم غنمي بلدي طازج",
-                "price": 13000,
-                "img": "images/لحم حنيذ.jpg"
-            },
-            {
-                "id": 1786843714572,
-                "name": "لحم بـرم",
-                "desc": "نص كيلو لحم غنمي بلدي طازج مع المرق والبطاطا",
-                "price": 13000,
-                "img": "images/برمة لحم.jpg"
-            },
-            {
-                "id": 1786844012347,
-                "name": "أرز محشي خروف",
-                "desc": "أرز مع مكعبات لحم بلدي",
-                "price": 7000,
-                "img": "images/ارز محشي خروف.jpg"
-            },
-            {
-                "id": 1786942738789,
-                "name": "عقدة لحم بلدي",
-                "desc": "نص كيلو لحم بلدي غنمي مقلوب عقدة",
-                "price": 13000,
-                "img": "images/عقدة لحم.jpg"
+        }
+
+        function moveCategory(catIdx, direction) {
+            const newIndex = catIdx + direction;
+            if (newIndex < 0 || newIndex >= menuData.length) return;
+            [menuData[catIdx], menuData[newIndex]] = [menuData[newIndex], menuData[catIdx]];
+            renderForm(menuData);
+            if (validatePrices()) autoSave();
+            else showError();
+        }
+
+        document.getElementById('add-category-btn').addEventListener('click', () => {
+            const newCategory = {
+                category: 'اسم القسم الجديد',
+                items: []
+            };
+            menuData.push(newCategory);
+            renderForm(menuData);
+            if (validatePrices()) autoSave();
+            else showError();
+        });
+
+        function validatePrices() {
+            for (let cat of menuData) {
+                for (let item of cat.items) {
+                    if (item.price === null || item.price === undefined || item.price === '' || isNaN(item.price)) {
+                        return false;
+                    }
+                }
             }
-        ]
-    },
-    {
-        "category": "العصائر والمشروبات",
-        "items": [
-            {
-                "id": 301,
-                "name": "عصير برتقال طازج",
-                "desc": "عصير برتقال طبيعي 100%",
-                "price": 1500,
-                "img": "images/orange_juice.jpg"
-            },
-            {
-                "id": 302,
-                "name": "كوكتيل فواكة",
-                "desc": "مزيج الموز والفراولة والحليب",
-                "price": 1500,
-                "img": "images/fruit_cocktail.jpg"
-            },
-            {
-                "id": 1786842793289,
-                "name": "عصير مانجو طبيعي",
-                "desc": "عصير مانجو طبيعي 100٪",
-                "price": 2000,
-                "img": "images/عصير مانجو.jpg"
-            },
-            {
-                "id": 1786842870819,
-                "name": "عصير مانجو بالحليب",
-                "desc": "عصير مانجو عادي ممزوج بالحليب",
-                "price": 1500,
-                "img": "images/مانجو بالحليب.jpg"
-            },
-            {
-                "id": 1786842967811,
-                "name": "عصير أفوكادو",
-                "desc": "عصير أوفاكادو طبيعي 100٪ ممزوج بالحليب",
-                "price": 2500,
-                "img": "images/عصير اوفكادو.jpg"
-            },
-            {
-                "id": 1786843145261,
-                "name": "عصير عرائسي",
-                "desc": "عصير بالمانجو والتفاح والموز والكيوي ممزوج بالحليب والزبيب والمكسرات ومحلى بالعسل",
-                "price": 2500,
-                "img": "images/عصير عرائسي.jpg"
-            },
-            {
-                "id": 1786843327853,
-                "name": "عصير عور قلب",
-                "desc": "",
-                "price": 2500,
-                "img": "images/عصير عور قلب.jpg"
-            },
-            {
-                "id": 1786843368058,
-                "name": "عصير طبقات",
-                "desc": "طبقات من العصائر الطبيعية ",
-                "price": 2500,
-                "img": "images/عصير طبقات.jpg"
-            },
-            {
-                "id": 1786843441413,
-                "name": "عصير أناناس",
-                "desc": "أناناس طبيعي 100٪",
-                "price": 2500,
-                "img": "images/عصير اناناس طبيعي.jpg"
-            },
-            {
-                "id": 1786844865887,
-                "name": "شاي حليب عدني",
-                "desc": "شاي بحليب الممتاز",
-                "price": 300,
-                "img": "images/شاي حليب.jpg"
-            },
-            {
-                "id": 1786942979710,
-                "name": "شاي أحمر بالنعناع",
-                "desc": "شاي ليبتون بالنعناع",
-                "price": 200,
-                "img": "images/شاي احمر.jpg"
-            },
-            {
-                "id": 1786943076983,
-                "name": "كوفي بالحليب",
-                "desc": "كوفي مع حليب الممتاز مع السكر او بدون حسب الطلب ",
-                "price": 600,
-                "img": "images/كوفي بالحليب.jpg"
-            },
-            {
-                "id": 1786943179408,
-                "name": "قهوة سادة",
-                "desc": "كوفي سادة مع السكر او بدون حسب الطلب ",
-                "price": 300,
-                "img": "images/كوفي سادة.jpg"
-            },
-            {
-                "id": 1786943355841,
-                "name": "كبتشينو",
-                "desc": "كوفي بالحليب والكاكو مخفوق برغوة كثيفة",
-                "price": 600,
-                "img": "images/كبتشينو.jpg"
-            },
-            {
-                "id": 1786943635789,
-                "name": "عصير الموز بالحليب",
-                "desc": "موز طبيعي + حليب + سكر",
-                "price": 1500,
-                "img": "images/حليب بالموز.jpg"
-            },
-            {
-                "id": 1786943713465,
-                "name": "عصير ميلك شيك",
-                "desc": "",
-                "price": 1500,
-                "img": "images/ميلك شيك.jpg"
-            },
-            {
-                "id": 1786943777191,
-                "name": "عصير كيوي",
-                "desc": "كيوي طبيعي ١٠٠٪",
-                "price": 2000,
-                "img": "images/عصير كيوي.jpg"
-            },
-            {
-                "id": 1786943829483,
-                "name": "عصير زنجبيل",
-                "desc": "زنجبيل اخضر طبيعي + سكر",
-                "price": 1500,
-                "img": "images/عصير زنجبيل.jpg"
-            },
-            {
-                "id": 1786943889641,
-                "name": "عصير ليمون",
-                "desc": "ليمون طبيعي + حليب + سكر",
-                "price": 400,
-                "img": "images/عصير ليمون.jpg"
-            },
-            {
-                "id": 1786943959763,
-                "name": "عصير ليمون بالنعناع",
-                "desc": "ليمون طبيعي+ نعناع اخضر + سكر",
-                "price": 500,
-                "img": "images/ليمون نعناع.jpg"
-            },
-            {
-                "id": 1786944052536,
-                "name": "عصير فرغلي",
-                "desc": "",
-                "price": 2500,
-                "img": "images/عصير فرغلي.jpg"
-            },
-            {
-                "id": 1786944092341,
-                "name": "عصير فراولة",
-                "desc": "فراولة طبيعية + حليب + سكر",
-                "price": 2000,
-                "img": "images/عصير فراولة.jpg"
-            },
-            {
-                "id": 1786944164048,
-                "name": "عصير تفاح",
-                "desc": "تفاح طبيعي + ثلج + سكر",
-                "price": 2000,
-                "img": "images/عصير تفاح.jpg"
-            },
-            {
-                "id": 1786944844200,
-                "name": "عصير عنب",
-                "desc": "عنب اسود طبيعي ١٠٠٪",
-                "price": 2000,
-                "img": "images/عصير عنب.jpg"
-            },
-            {
-                "id": 1786944215360,
-                "name": "مياة معدنية",
-                "desc": "علبة مياة معدنية",
-                "price": 300,
-                "img": "images/ماء.jpg"
-            },
-            {
-                "id": 1786944319868,
-                "name": "مشروب غازي",
-                "desc": "علبة شراب غازية",
-                "price": 600,
-                "img": "images/شراب.jpg"
+            return true;
+        }
+
+        function showError() {
+            document.getElementById('error-message').style.display = 'block';
+            document.getElementById('save-status').style.display = 'none';
+        }
+
+        function hideError() {
+            document.getElementById('error-message').style.display = 'none';
+        }
+
+        function showStatus(message) {
+            const status = document.getElementById('save-status');
+            if (message) {
+                status.textContent = message;
+                status.style.display = 'block';
+                setTimeout(() => { status.style.display = 'none'; }, 3000);
+            } else {
+                status.style.display = 'none';
             }
-        ]
-    },
-    {
-        "category": "الحلويات",
-        "items": [
-            {
-                "id": 1786946183433,
-                "name": "كنافة بالقشطة",
-                "desc": "",
-                "price": 2500,
-                "img": "images/كنافة بالقشطة.jpg"
-            },
-            {
-                "id": 1786951267700,
-                "name": "كنافة بالنوتيلا",
-                "desc": "",
-                "price": 2500,
-                "img": "images/كنافة بالنوتيلا.jpg"
+        }
+
+        function autoSave() {
+            const dataToSave = {
+                ticker_text: tickerText,
+                categories: menuData
+            };
+            if (validatePrices()) {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+                showStatus('✅ تم الحفظ تلقائياً في المتصفح');
+                hideError();
+            } else {
+                showError();
             }
-        ]
-    }
-]
+        }
+
+        document.getElementById('save-btn').addEventListener('click', () => {
+            if (!validatePrices()) {
+                showError();
+                alert('⚠️ لا يمكن الحفظ: توجد خانات سعر فارغة. الرجاء تعبئة جميع الأسعار.');
+                return;
+            }
+            const dataToSave = {
+                ticker_text: tickerText,
+                categories: menuData
+            };
+            const jsonStr = JSON.stringify(dataToSave, null, 4);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'menu.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            alert('تم تجهيز الملف! ارفعه إلى GitHub في نفس مجلد menu.json.');
+        });
+
+        document.getElementById('copy-btn').addEventListener('click', () => {
+            if (!validatePrices()) {
+                showError();
+                alert('⚠️ لا يمكن النسخ: توجد خانات سعر فارغة. الرجاء تعبئة جميع الأسعار.');
+                return;
+            }
+            const dataToSave = {
+                ticker_text: tickerText,
+                categories: menuData
+            };
+            const jsonStr = JSON.stringify(dataToSave, null, 4);
+            navigator.clipboard.writeText(jsonStr).then(() => {
+                alert('تم نسخ JSON بنجاح');
+            }).catch(() => {
+                alert('تعذر النسخ. انسخ يدوياً من النص.');
+            });
+        });
+    </script>
+</body>
+</html>

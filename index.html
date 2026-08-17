@@ -782,17 +782,8 @@
 
     <!-- شريط الأخبار -->
     <div class="news-ticker">
-        <div class="ticker-track">
-            <div class="ticker-group">
-                <span class="ticker-item">✨ أهلاً بكم في مطعم الريان | حيث يجتمع الإبداع والتميز في تقديم أشهى المأكولات البحرية ✨</span>
-                <span class="ticker-item">📍 عدن، كريتر، الميدان، جوار فندق العامر</span>
-                <span class="ticker-item">📞 للتواصل: 256756 - 256757 | 📱 771256757 - 771256756</span>
-            </div>
-            <div class="ticker-group" aria-hidden="true">
-                <span class="ticker-item">✨ أهلاً بكم في مطعم الريان | حيث يجتمع الإبداع والتميز في تقديم أشهى المأكولات البحرية ✨</span>
-                <span class="ticker-item">📍 عدن، كريتر، الميدان، جوار فندق العامر</span>
-                <span class="ticker-item">📞 للتواصل: 256756 - 256757 | 📱 771256757 - 771256756</span>
-            </div>
+        <div class="ticker-track" id="ticker-track">
+            <!-- سيتم تحديثه من جافاسكريبت -->
         </div>
     </div>
 
@@ -898,7 +889,8 @@
     <script>
         const restaurantPhone = "967735168698"; 
         const STORAGE_KEY = 'rayyan_restaurant_cart';
-        let menuData = [];
+        let menuData = [];  // ستحتوي على الأقسام (مصفوفة) بعد المعالجة
+        let tickerText = ''; // نص الشريط الإخباري
         let cart = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
         let currentTabIndex = 0;
         let isSearching = false;
@@ -935,7 +927,21 @@
             try {
                 const response = await fetch('menu.json');
                 if (!response.ok) throw new Error('Network response was not ok');
-                menuData = await response.json();
+                const rawData = await response.json();
+
+                // دعم البنية الجديدة: كائن يحتوي على ticker_text و categories
+                if (rawData && typeof rawData === 'object' && rawData.categories) {
+                    menuData = rawData.categories;
+                    tickerText = rawData.ticker_text || '';
+                } else if (Array.isArray(rawData)) {
+                    // البنية القديمة (مصفوفة أقسام فقط)
+                    menuData = rawData;
+                    tickerText = ''; // لا يوجد شريط أخبار
+                } else {
+                    throw new Error('بنية menu.json غير معروفة');
+                }
+
+                renderTicker(tickerText);
                 renderTabs();
                 if (menuData.length > 0) renderItems(0);
             } catch (error) {
@@ -944,6 +950,21 @@
                         ⚠️ عذراً، تأكد من رفع ملف menu.json بجوار ملف index.html
                     </div>`;
             }
+        }
+
+        function renderTicker(text) {
+            const track = document.getElementById('ticker-track');
+            if (!track) return;
+            if (!text) text = '✨ أهلاً بكم في مطعم الريان ✨';
+            // بناء مجموعتين لتحقيق حركة مستمرة
+            track.innerHTML = `
+                <div class="ticker-group">
+                    <span class="ticker-item">${text}</span>
+                </div>
+                <div class="ticker-group" aria-hidden="true">
+                    <span class="ticker-item">${text}</span>
+                </div>
+            `;
         }
 
         function renderTabs() {
@@ -1155,7 +1176,7 @@
 
         function sendOrder() {
             const customerNameInput = document.getElementById('customer-name');
-            const customerName = customerNameInput.value.target ? customerNameInput.value.trim() : customerNameInput.value.trim();
+            const customerName = customerNameInput.value.trim();
             if (!customerName) {
                 alert("فضلاً، أدخل اسمك الكريم في الأعلى لنتمكن من تحضير طلبك باسمك.");
                 closeModal();
