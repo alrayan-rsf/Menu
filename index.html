@@ -62,7 +62,7 @@
             letter-spacing: 1px;
         }
 
-        /* --- Hamburger Menu Icon (تصغير الحجم للأناقة) --- */
+        /* --- Hamburger Menu Icon --- */
         .hamburger-btn {
             position: absolute;
             top: 22px;
@@ -545,21 +545,32 @@
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
         }
 
+        /* === تحسين الصور: نسبة موحدة + تحميل كسول + تأثير ضبابي === */
         .item-img-wrap {
             width: 100%;
-            height: 210px;
+            aspect-ratio: 4 / 3; /* نسبة موحدة 4:3 */
             overflow: hidden;
+            background: #f1f5f9; /* لون خلفية أثناء التحميل */
         }
 
         .item-img-wrap img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
-            transition: transform 0.6s ease;
+            object-fit: cover; /* قص مركزي */
+            transition: transform 0.6s ease, filter 0.5s ease;
+            display: block;
+            filter: blur(5px); /* ضبابية مؤقتة */
+            transform: scale(1.05); /* تكبير بسيط لمنع حواف الضبابية */
+        }
+
+        .item-img-wrap img.loaded {
+            filter: blur(0);
+            transform: scale(1);
         }
 
         .item:hover .item-img-wrap img {
-            transform: scale(1.1);
+            transform: scale(1.1); /* تكبير عند التمرير */
+            filter: blur(0);
         }
 
         .item-info {
@@ -768,7 +779,7 @@
 </head>
 <body>
     <div class="header">
-        <!-- زر القائمة الجانبية (الثلاث شرطات المصغر والأنيق) -->
+        <!-- زر القائمة الجانبية -->
         <button class="hamburger-btn" onclick="openSidebar()" aria-label="فتح القائمة">
             <span></span>
             <span></span>
@@ -846,7 +857,7 @@
     <!-- طبقة التعتيم للقائمة الجانبية -->
     <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 
-    <!-- هيكل القائمة الجانبية الإبداعي -->
+    <!-- هيكل القائمة الجانبية -->
     <div class="sidebar-menu" id="sidebar-menu">
         <div class="sidebar-header">
             <h2>القائمة الرئيسية</h2>
@@ -854,13 +865,11 @@
         </div>
         
         <div class="sidebar-content">
-            <!-- زر البحث السريع -->
             <a href="#" class="sidebar-main-action" onclick="focusMainSearch(event)">
                 <span style="font-size: 20px;">🔍</span> 
                 البحث السريع
             </a>
 
-            <!-- QR Code المرفق بتصميم أنيق واحترافي -->
             <div class="sidebar-qr-section">
                 <h3><span>📱</span> امسح للوصول السريع</h3>
                 <div class="qr-img-container">
@@ -869,7 +878,6 @@
                 <div class="qr-caption">وجه كاميرا هاتفك للمسح</div>
             </div>
 
-            <!-- بطاقة تعريف المطعم الأنيقة (حول مطعم الريان) -->
             <div class="about-card">
                 <h3>حول مطعم الريان</h3>
                 <p class="about-welcome">✨ مطعم الريان يرحب بكم ✨</p>
@@ -889,8 +897,8 @@
     <script>
         const restaurantPhone = "967735168698"; 
         const STORAGE_KEY = 'rayyan_restaurant_cart';
-        let menuData = [];  // ستحتوي على الأقسام (مصفوفة) بعد المعالجة
-        let tickerText = ''; // نص الشريط الإخباري
+        let menuData = [];
+        let tickerText = '';
         let cart = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
         let currentTabIndex = 0;
         let isSearching = false;
@@ -901,7 +909,6 @@
             setupSearch();
         });
 
-        /* --- دوال التحكم بالقائمة الجانبية --- */
         function openSidebar() {
             document.getElementById('sidebar-menu').classList.add('active');
             document.getElementById('sidebar-overlay').classList.add('active');
@@ -921,7 +928,6 @@
             searchInput.focus();
             window.scrollTo({ top: searchInput.offsetTop - 100, behavior: 'smooth' });
         }
-        /* ---------------------------------- */
 
         async function fetchMenu() {
             try {
@@ -929,14 +935,12 @@
                 if (!response.ok) throw new Error('Network response was not ok');
                 const rawData = await response.json();
 
-                // دعم البنية الجديدة: كائن يحتوي على ticker_text و categories
                 if (rawData && typeof rawData === 'object' && rawData.categories) {
                     menuData = rawData.categories;
                     tickerText = rawData.ticker_text || '';
                 } else if (Array.isArray(rawData)) {
-                    // البنية القديمة (مصفوفة أقسام فقط)
                     menuData = rawData;
-                    tickerText = ''; // لا يوجد شريط أخبار
+                    tickerText = '';
                 } else {
                     throw new Error('بنية menu.json غير معروفة');
                 }
@@ -956,7 +960,6 @@
             const track = document.getElementById('ticker-track');
             if (!track) return;
             if (!text) text = '✨ أهلاً بكم في مطعم الريان ✨';
-            // بناء مجموعتين لتحقيق حركة مستمرة
             track.innerHTML = `
                 <div class="ticker-group">
                     <span class="ticker-item">${text}</span>
@@ -995,7 +998,7 @@
                 grid.innerHTML += `
                     <div class="item" style="animation-delay: ${animationDelay}s;">
                         <div class="item-img-wrap">
-                            <img src="${item.img}" alt="${item.name}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22260%22 height=%22200%22 style=%22background:%23f1f5f9;%22%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%2394a3b8%22%3Eصورة غير متوفرة%3C/text%3E%3C/svg%3E'">
+                            <img src="${item.img}" alt="${item.name}" loading="lazy" decoding="async" class="item-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22260%22 height=%22200%22 style=%22background:%23f1f5f9;%22%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%2394a3b8%22%3Eصورة غير متوفرة%3C/text%3E%3C/svg%3E'">
                         </div>
                         <div class="item-info">
                             <div>
@@ -1009,6 +1012,7 @@
                     </div>`;
             });
             container.appendChild(grid);
+            setupImageLoadingEffects(); // تفعيل تأثير الضبابية بعد الإضافة
         }
 
         function renderItemsFromArray(items, searchTerm = '') {
@@ -1028,7 +1032,7 @@
                 grid.innerHTML += `
                     <div class="item" style="animation-delay: ${animationDelay}s;">
                         <div class="item-img-wrap">
-                            <img src="${item.img}" alt="${item.name}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22260%22 height=%22200%22 style=%22background:%23f1f5f9;%22%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%2394a3b8%22%3Eصورة غير متوفرة%3C/text%3E%3C/svg%3E'">
+                            <img src="${item.img}" alt="${item.name}" loading="lazy" decoding="async" class="item-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22260%22 height=%22200%22 style=%22background:%23f1f5f9;%22%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%2394a3b8%22%3Eصورة غير متوفرة%3C/text%3E%3C/svg%3E'">
                         </div>
                         <div class="item-info">
                             <div>
@@ -1042,6 +1046,19 @@
                     </div>`;
             });
             container.appendChild(grid);
+            setupImageLoadingEffects();
+        }
+
+        function setupImageLoadingEffects() {
+            document.querySelectorAll('.item-img-wrap img').forEach(img => {
+                if (img.complete) {
+                    img.classList.add('loaded');
+                } else {
+                    img.addEventListener('load', () => {
+                        img.classList.add('loaded');
+                    });
+                }
+            });
         }
 
         function setupSearch() {
