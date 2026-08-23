@@ -372,6 +372,14 @@
                     "desc": "ملوخية بالدجاج",
                     "price": 1600,
                     "img": "images/ملوخية.jpg"
+                },
+                {
+                    "id": 1787454554464,
+                    "name": "نص دجاج برمة",
+                    "desc": "",
+                    "price": 4400,
+                    "img": "images/دجاج برم.jpg",
+                    "undefined": "C:\\fakepath\\دجاج برم.jpg"
                 }
             ]
         },
