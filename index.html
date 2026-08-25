@@ -993,7 +993,9 @@
             container.innerHTML = '';
             const grid = document.createElement('div');
             grid.className = 'menu-grid';
-            menuData[catIdx].items.forEach((item, index) => {
+            // ✅ فلترة الأصناف غير المتاحة
+            const availableItems = menuData[catIdx].items.filter(item => item.available !== false);
+            availableItems.forEach((item, index) => {
                 const animationDelay = index * 0.05;
                 grid.innerHTML += `
                     <div class="item" style="animation-delay: ${animationDelay}s;">
@@ -1018,10 +1020,12 @@
         function renderItemsFromArray(items, searchTerm = '') {
             const container = document.getElementById('menu-container');
             container.innerHTML = '';
+            // ✅ فلترة الأصناف غير المتاحة (احتياطاً)
+            items = items.filter(item => item.available !== false);
             if (items.length === 0) {
                 container.innerHTML = `
                     <div style="text-align:center; padding: 40px; color: #64748b; font-weight: bold;">
-                        🔍 لا توجد أصناف تطابق "<span style="color: var(--gold-shine);">${searchTerm}</span>"
+                        🔍 لا توجد أصناف مطابقة "<span style="color: var(--gold-shine);">${searchTerm}</span>"
                     </div>`;
                 return;
             }
@@ -1084,7 +1088,12 @@
 
                 const allItems = [];
                 menuData.forEach(cat => {
-                    allItems.push(...cat.items);
+                    // ✅ إضافة شرط الفلترة أثناء تجميع العناصر للبحث
+                    cat.items.forEach(item => {
+                        if (item.available !== false) {
+                            allItems.push(item);
+                        }
+                    });
                 });
 
                 const filtered = allItems.filter(item =>
