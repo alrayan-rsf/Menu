@@ -10,7 +10,7 @@
                     "desc": "نص كيلو لحم + رز + علبة شراب",
                     "price": 15000,
                     "img": "images/لحم مع الرز.jpg",
-                    "available": false
+                    "available": true
                 }
             ]
         },
@@ -693,7 +693,7 @@
                     "desc": "",
                     "price": 2500,
                     "img": "images/كنافة بالقشطة.jpg",
-                    "available": false
+                    "available": true
                 },
                 {
                     "id": 1786951267700,
