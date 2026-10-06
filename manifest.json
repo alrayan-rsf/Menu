@@ -1,0 +1,46 @@
+{
+    "name": "مطعم الريان للأطباق البحرية",
+    "short_name": "الريان",
+    "description": "القائمة الذكية لمطعم الريان للأطباق البحرية - عدن، كريتر",
+    "lang": "ar",
+    "dir": "rtl",
+    "start_url": "./index.html",
+    "scope": "./",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#0e1a35",
+    "theme_color": "#0e1a35",
+    "categories": ["food", "shopping"],
+    "icons": [
+        {
+            "src": "icons/android/launchericon-72x72.png",
+            "sizes": "72x72",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "icons/android/launchericon-96x96.png",
+            "sizes": "96x96",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "icons/android/launchericon-144x144.png",
+            "sizes": "144x144",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "icons/android/launchericon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "icons/android/launchericon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}

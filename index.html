@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مطعم الريان للأطباق البحرية - القائمة الذكية</title>
+    
+    <!-- ✅ إضافات PWA (تمت الإضافة) -->
+    <meta name="theme-color" content="#0e1a35">
+    <meta name="description" content="القائمة الذكية لمطعم الريان للأطباق البحرية - عدن، كريتر">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/android/launchericon-192x192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="الريان">
+    <meta name="mobile-web-app-capable" content="yes">
+
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -1241,6 +1252,100 @@
         window.onclick = function(event) {
             const modal = document.getElementById('cart-modal');
             if (event.target == modal) closeModal();
+        }
+    </script>
+
+    <!-- ✅ كود PWA (Service Worker + زر التثبيت) -->
+    <script>
+        // ====== تسجيل Service Worker ======
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then((registration) => {
+                        console.log('✅ Service Worker registered:', registration.scope);
+
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    if (confirm('🎉 يوجد تحديث جديد للقائمة! هل تريد إعادة التحميل؟')) {
+                                        newWorker.postMessage({ type: 'SKIP_WAITING' });
+                                        window.location.reload();
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch((error) => {
+                        console.warn('⚠️ Service Worker registration failed:', error);
+                    });
+            });
+        }
+
+        // ====== زر التثبيت ======
+        let deferredPrompt = null;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            showInstallButton();
+        });
+
+        function showInstallButton() {
+            if (document.getElementById('pwa-install-btn')) return;
+
+            const btn = document.createElement('button');
+            btn.id = 'pwa-install-btn';
+            btn.innerHTML = '📲 تثبيت التطبيق';
+            btn.style.cssText = `
+                position: fixed;
+                bottom: 90px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: linear-gradient(135deg, #c5a02a, #e6c66a);
+                color: #0e1a35;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 25px;
+                font-weight: 900;
+                font-size: 15px;
+                cursor: pointer;
+                z-index: 899;
+                box-shadow: 0 8px 20px rgba(197, 160, 42, 0.4);
+                font-family: 'Cairo', sans-serif;
+                animation: pulseInstall 2s infinite;
+            `;
+
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes pulseInstall {
+                    0%, 100% { transform: translateX(-50%) scale(1); }
+                    50% { transform: translateX(-50%) scale(1.05); }
+                }
+            `;
+            document.head.appendChild(style);
+
+            btn.onclick = async () => {
+                if (!deferredPrompt) return;
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log('Install outcome:', outcome);
+                deferredPrompt = null;
+                btn.remove();
+            };
+
+            document.body.appendChild(btn);
+        }
+
+        window.addEventListener('appinstalled', () => {
+            console.log('✅ PWA installed successfully');
+            const btn = document.getElementById('pwa-install-btn');
+            if (btn) btn.remove();
+            deferredPrompt = null;
+        });
+
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+            console.log('📱 Running as installed PWA');
+            document.body.classList.add('pwa-mode');
         }
     </script>
 </body>
