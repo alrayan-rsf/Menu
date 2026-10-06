@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "io.github.alrayan_rsf.twa",
+        "sha256_cert_fingerprints": ["94:03:BF:C8:71:20:CC:46:47:F2:3F:CC:6A:0C:4D:FC:C1:71:6A:B7:95:62:C5:7F:D6:43:F7:C3:8C:65:CF:8C"]
+      }
+    }]
