@@ -1354,14 +1354,15 @@
             const customerName = customerNameInput.value.trim();
             if (!customerName) {
                 alert('أضف اسمك لنتمكن من تحضير طلبك.');
-                // بعد إغلاق التنبيه، انقل العميل إلى حقل الاسم بوضوح، خصوصًا على الجوال.
-                customerNameInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // أغلق نافذة السلة أولاً لأن حقل الاسم موجود في الصفحة خلفها.
+                closeModal();
                 window.setTimeout(() => {
+                    customerNameInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     customerNameInput.focus({ preventScroll: true });
                     try {
                         customerNameInput.select();
                     } catch (_) {}
-                }, 150);
+                }, 180);
                 return;
             }
             if (cart.length === 0) return;
