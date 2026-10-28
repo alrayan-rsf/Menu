@@ -1,8 +1,8 @@
 // ============================================
 // Service Worker - مطعم الريان
 // ============================================
-const CACHE_NAME = 'rayyan-menu-v1.1.0';
-const RUNTIME_CACHE = 'rayyan-runtime-v1.1.0';
+const CACHE_NAME = 'rayyan-menu-v1.2.0';
+const RUNTIME_CACHE = 'rayyan-runtime-v1.2.0';
 
 // الملفات الأساسية التي سيتم تخزينها مسبقاً
 const PRECACHE_URLS = [
@@ -64,6 +64,25 @@ self.addEventListener('fetch', (event) => {
         // استراتيجية: الشبكة أولاً مع fallback للتخزين
         event.respondWith(
             fetch(request).catch(() => caches.match(request))
+        );
+        return;
+    }
+
+    // صفحة الموقع: الشبكة أولاً لضمان وصول إصلاحات index.html المنشورة.
+    // عند انقطاع الإنترنت فقط، نستخدم النسخة المخزنة كحل احتياطي.
+    if (request.mode === 'navigate' || url.pathname.endsWith('/index.html') || url.pathname === '/index.html') {
+        event.respondWith(
+            fetch(request, { cache: 'no-store' }).then(response => {
+                if (response && response.ok) {
+                    const copy = response.clone();
+                    caches.open(CACHE_NAME).then(cache => cache.put('./index.html', copy));
+                }
+                return response;
+            }).catch(async () => {
+                const cached = await caches.match('./index.html');
+                if (cached) return cached;
+                throw new Error('تعذر تحميل صفحة الموقع');
+            })
         );
         return;
     }
