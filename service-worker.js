@@ -39,11 +39,17 @@ self.addEventListener('activate', (event) => {
     console.log('[SW] Activating...');
     event.waitUntil(
         caches.keys().then((cacheNames) => {
+            // احذف النسخ القديمة التابعة لهذا الموقع فقط، ولا تلمس مخازن
+            // التخزين المؤقت التي قد تستخدمها تطبيقات أخرى على النطاق نفسه.
             return Promise.all(
                 cacheNames
-                    .filter(name => name !== CACHE_NAME && name !== RUNTIME_CACHE)
+                    .filter(name =>
+                        (name.startsWith('rayyan-menu-') || name.startsWith('rayyan-runtime-')) &&
+                        name !== CACHE_NAME &&
+                        name !== RUNTIME_CACHE
+                    )
                     .map(name => {
-                        console.log('[SW] Deleting old cache:', name);
+                        console.log('[SW] Deleting old Rayyan cache:', name);
                         return caches.delete(name);
                     })
             );
