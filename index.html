@@ -1353,8 +1353,15 @@
             const customerNameInput = document.getElementById('customer-name');
             const customerName = customerNameInput.value.trim();
             if (!customerName) {
-                alert('فضلاً، أدخل اسمك في الأعلى لنتمكن من تحضير طلبك باسمك.');
-                customerNameInput.focus();
+                alert('أضف اسمك لنتمكن من تحضير طلبك.');
+                // بعد إغلاق التنبيه، انقل العميل إلى حقل الاسم بوضوح، خصوصًا على الجوال.
+                customerNameInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                window.setTimeout(() => {
+                    customerNameInput.focus({ preventScroll: true });
+                    try {
+                        customerNameInput.select();
+                    } catch (_) {}
+                }, 150);
                 return;
             }
             if (cart.length === 0) return;
