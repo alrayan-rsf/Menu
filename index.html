@@ -906,13 +906,29 @@
     </div>
 
     <script>
-        const restaurantPhone = "967735168698"; 
+        const restaurantPhone = "967735168698";
         const STORAGE_KEY = 'rayyan_restaurant_cart';
         let menuData = [];
         let tickerText = '';
-        let cart = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        let cart = loadStoredCart();
         let currentTabIndex = 0;
         let isSearching = false;
+
+        function loadStoredCart() {
+            try {
+                const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+                if (!Array.isArray(stored)) return [];
+                return stored.map(item => ({
+                    id: String(item.id ?? ''),
+                    name: String(item.name ?? 'صنف'),
+                    price: Number(item.price),
+                    qty: Number(item.qty)
+                })).filter(item => item.id && Number.isFinite(item.price) && item.price >= 0 && Number.isInteger(item.qty) && item.qty > 0);
+            } catch (error) {
+                console.warn('تعذر قراءة السلة المحفوظة:', error);
+                return [];
+            }
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             fetchMenu();
@@ -923,13 +939,13 @@
         function openSidebar() {
             document.getElementById('sidebar-menu').classList.add('active');
             document.getElementById('sidebar-overlay').classList.add('active');
-            document.body.style.overflow = 'hidden'; 
+            document.body.style.overflow = 'hidden';
         }
 
         function closeSidebar() {
             document.getElementById('sidebar-menu').classList.remove('active');
             document.getElementById('sidebar-overlay').classList.remove('active');
-            document.body.style.overflow = 'auto'; 
+            document.body.style.overflow = document.getElementById('cart-modal').style.display === 'block' ? 'hidden' : 'auto';
         }
 
         function focusMainSearch(e) {
@@ -942,138 +958,211 @@
 
         async function fetchMenu() {
             try {
-                const response = await fetch('menu.json');
-                if (!response.ok) throw new Error('Network response was not ok');
+                const response = await fetch('menu.json', { cache: 'no-cache' });
+                if (!response.ok) throw new Error('تعذر تحميل ملف القائمة');
                 const rawData = await response.json();
+                const categories = rawData && typeof rawData === 'object' && Array.isArray(rawData.categories)
+                    ? rawData.categories
+                    : Array.isArray(rawData) ? rawData : null;
+                if (!categories) throw new Error('بنية menu.json غير معروفة');
 
-                if (rawData && typeof rawData === 'object' && rawData.categories) {
-                    menuData = rawData.categories;
-                    tickerText = rawData.ticker_text || '';
-                } else if (Array.isArray(rawData)) {
-                    menuData = rawData;
-                    tickerText = '';
-                } else {
-                    throw new Error('بنية menu.json غير معروفة');
-                }
+                const seenIds = new Set();
+                const validCategories = [];
+                categories.forEach((category, categoryIndex) => {
+                    if (!category || typeof category.category !== 'string' || !Array.isArray(category.items)) return;
+                    const validItems = [];
+                    category.items.forEach((item, itemIndex) => {
+                        if (!item || item.id === undefined || item.id === null || String(item.id).trim() === '') return;
+                        const id = String(item.id);
+                        if (seenIds.has(id)) {
+                            console.error(`معرّف صنف مكرر: ${id}`, item);
+                            return;
+                        }
+                        const price = Number(item.price);
+                        if (!Number.isFinite(price) || price < 0 || typeof item.name !== 'string' || !item.name.trim()) {
+                            console.error('تم تجاهل صنف ببيانات غير صالحة:', item);
+                            return;
+                        }
+                        seenIds.add(id);
+                        validItems.push({
+                            ...item,
+                            id,
+                            name: item.name.trim(),
+                            price,
+                            desc: typeof item.desc === 'string' ? item.desc : '',
+                            img: typeof item.img === 'string' ? item.img : '',
+                            available: item.available !== false,
+                            _key: id,
+                            _categoryIndex: categoryIndex,
+                            _itemIndex: itemIndex
+                        });
+                    });
+                    validCategories.push({ ...category, category: category.category, items: validItems });
+                });
+                if (validCategories.length === 0) throw new Error('لا توجد أقسام صالحة في ملف القائمة');
 
+                menuData = validCategories;
+                tickerText = typeof rawData.ticker_text === 'string' ? rawData.ticker_text : '';
+                reconcileCartWithMenu();
                 renderTicker(tickerText);
                 renderTabs();
                 if (menuData.length > 0) renderItems(0);
             } catch (error) {
-                document.getElementById('menu-container').innerHTML = `
-                    <div style="text-align:center; padding: 40px; color: var(--danger-red); font-weight: bold;">
-                        ⚠️ عذراً، تأكد من رفع ملف menu.json بجوار ملف index.html
-                    </div>`;
+                console.error(error);
+                const container = document.getElementById('menu-container');
+                container.replaceChildren();
+                const message = document.createElement('div');
+                message.style.cssText = 'text-align:center;padding:40px;color:var(--danger-red);font-weight:bold;';
+                message.textContent = '⚠️ تعذر تحميل القائمة. تأكد من صحة ملف menu.json ورفعه بجوار index.html.';
+                container.appendChild(message);
             }
+        }
+
+        function reconcileCartWithMenu() {
+            const itemsById = new Map();
+            menuData.forEach(category => category.items.forEach(item => itemsById.set(String(item.id), item)));
+            const itemsByName = new Map();
+            menuData.forEach(category => category.items.forEach(item => {
+                const key = item.name.trim().toLocaleLowerCase();
+                if (!itemsByName.has(key)) itemsByName.set(key, item);
+            }));
+            cart = cart.map(cartItem => {
+                let current = itemsById.get(String(cartItem.id));
+                // ترحيل سلة قديمة بأمان عند إصلاح معرّف مكرر (مثل عصير البرتقال الذي كان يحمل 301).
+                if (current && current.name !== cartItem.name) {
+                    const nameMatch = itemsByName.get(String(cartItem.name).trim().toLocaleLowerCase());
+                    if (nameMatch) current = nameMatch;
+                } else if (!current) {
+                    current = itemsByName.get(String(cartItem.name).trim().toLocaleLowerCase());
+                }
+                if (!current) return cartItem;
+                return { id: String(current.id), name: current.name, price: current.price, qty: cartItem.qty };
+            }).filter(item => Number.isFinite(item.price) && item.price >= 0 && Number.isInteger(item.qty) && item.qty > 0);
+            saveCart();
         }
 
         function renderTicker(text) {
             const track = document.getElementById('ticker-track');
             if (!track) return;
-            if (!text) text = '✨ أهلاً بكم في مطعم الريان ✨';
-            track.innerHTML = `
-                <div class="ticker-group">
-                    <span class="ticker-item">${text}</span>
-                </div>
-                <div class="ticker-group" aria-hidden="true">
-                    <span class="ticker-item">${text}</span>
-                </div>
-            `;
+            const ticker = text || '✨ أهلاً بكم في مطعم الريان ✨';
+            track.replaceChildren();
+            for (let i = 0; i < 2; i++) {
+                const group = document.createElement('div');
+                group.className = 'ticker-group';
+                if (i === 1) group.setAttribute('aria-hidden', 'true');
+                const span = document.createElement('span');
+                span.className = 'ticker-item';
+                span.textContent = ticker;
+                group.appendChild(span);
+                track.appendChild(group);
+            }
         }
 
         function renderTabs() {
             const nav = document.getElementById('tab-nav');
-            nav.innerHTML = '';
+            nav.replaceChildren();
             menuData.forEach((cat, i) => {
                 const btn = document.createElement('button');
                 btn.className = `tab-btn ${i === 0 ? 'active' : ''}`;
-                btn.innerText = cat.category;
-                btn.onclick = (e) => {
-                    clearSearch(); 
+                btn.type = 'button';
+                btn.textContent = cat.category;
+                btn.addEventListener('click', () => {
+                    clearSearch();
                     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                    e.target.classList.add('active');
+                    btn.classList.add('active');
                     currentTabIndex = i;
                     renderItems(i);
-                };
+                });
                 nav.appendChild(btn);
             });
         }
 
+        function safeImagePath(path) {
+            if (typeof path !== 'string' || !path.trim()) return '';
+            const value = path.trim();
+            // القائمة تستخدم مسارات صور محلية؛ ارفض البروتوكولات والروابط غير المحلية.
+            if (/^(?:https?:|javascript:|data:|\/\/)/i.test(value) || value.startsWith('/')) return '';
+            if (value.split('/').some(part => part === '..')) return '';
+            return value;
+        }
+
+        function createItemCard(item, index) {
+            const card = document.createElement('article');
+            card.className = 'item';
+            card.style.animationDelay = `${index * 0.05}s`;
+
+            const imageWrap = document.createElement('div');
+            imageWrap.className = 'item-img-wrap';
+            const img = document.createElement('img');
+            img.className = 'item-image';
+            img.alt = item.name;
+            img.loading = 'lazy';
+            img.decoding = 'async';
+            const imagePath = safeImagePath(item.img);
+            if (imagePath) img.src = imagePath;
+            img.addEventListener('error', () => {
+                img.removeAttribute('src');
+                img.alt = `الصورة غير متوفرة: ${item.name}`;
+                img.classList.add('image-unavailable');
+                imageWrap.textContent = 'صورة غير متوفرة';
+            }, { once: true });
+            img.addEventListener('load', () => img.classList.add('loaded'), { once: true });
+            imageWrap.appendChild(img);
+
+            const info = document.createElement('div');
+            info.className = 'item-info';
+            const titleWrap = document.createElement('div');
+            const title = document.createElement('h3');
+            title.textContent = item.name;
+            titleWrap.appendChild(title);
+            if (item.desc) {
+                const description = document.createElement('p');
+                description.className = 'item-description';
+                description.textContent = item.desc;
+                titleWrap.appendChild(description);
+            }
+            const actionWrap = document.createElement('div');
+            const price = document.createElement('div');
+            price.className = 'price';
+            price.textContent = `${item.price.toLocaleString()} ر.ي`;
+            const addButton = document.createElement('button');
+            addButton.className = 'add-btn';
+            addButton.type = 'button';
+            addButton.textContent = '➕ إضافة للسلة';
+            addButton.addEventListener('click', () => addToCart(item.id));
+            actionWrap.append(price, addButton);
+            info.append(titleWrap, actionWrap);
+            card.append(imageWrap, info);
+            return card;
+        }
+
         function renderItems(catIdx) {
             const container = document.getElementById('menu-container');
-            container.innerHTML = '';
+            container.replaceChildren();
+            if (!menuData[catIdx]) return;
             const grid = document.createElement('div');
             grid.className = 'menu-grid';
-            // ✅ فلترة الأصناف غير المتاحة
-            const availableItems = menuData[catIdx].items.filter(item => item.available !== false);
-            availableItems.forEach((item, index) => {
-                const animationDelay = index * 0.05;
-                grid.innerHTML += `
-                    <div class="item" style="animation-delay: ${animationDelay}s;">
-                        <div class="item-img-wrap">
-                            <img src="${item.img}" alt="${item.name}" loading="lazy" decoding="async" class="item-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22260%22 height=%22200%22 style=%22background:%23f1f5f9;%22%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%2394a3b8%22%3Eصورة غير متوفرة%3C/text%3E%3C/svg%3E'">
-                        </div>
-                        <div class="item-info">
-                            <div>
-                                <h3>${item.name}</h3>
-                            </div>
-                            <div>
-                                <div class="price">${item.price.toLocaleString()} ر.ي</div>
-                                <button class="add-btn" onclick="addToCart(${item.id}, '${item.name}', ${item.price})">➕ إضافة للسلة</button>
-                            </div>
-                        </div>
-                    </div>`;
+            menuData[catIdx].items.filter(item => item.available !== false).forEach((item, index) => {
+                grid.appendChild(createItemCard(item, index));
             });
             container.appendChild(grid);
-            setupImageLoadingEffects(); // تفعيل تأثير الضبابية بعد الإضافة
         }
 
         function renderItemsFromArray(items, searchTerm = '') {
             const container = document.getElementById('menu-container');
-            container.innerHTML = '';
-            // ✅ فلترة الأصناف غير المتاحة (احتياطاً)
-            items = items.filter(item => item.available !== false);
-            if (items.length === 0) {
-                container.innerHTML = `
-                    <div style="text-align:center; padding: 40px; color: #64748b; font-weight: bold;">
-                        🔍 لا توجد أصناف مطابقة "<span style="color: var(--gold-shine);">${searchTerm}</span>"
-                    </div>`;
+            container.replaceChildren();
+            const availableItems = items.filter(item => item.available !== false);
+            if (availableItems.length === 0) {
+                const empty = document.createElement('div');
+                empty.style.cssText = 'text-align:center;padding:40px;color:#64748b;font-weight:bold;';
+                empty.textContent = `🔍 لا توجد أصناف مطابقة "${searchTerm}"`;
+                container.appendChild(empty);
                 return;
             }
             const grid = document.createElement('div');
             grid.className = 'menu-grid';
-            items.forEach((item, index) => {
-                const animationDelay = index * 0.05;
-                grid.innerHTML += `
-                    <div class="item" style="animation-delay: ${animationDelay}s;">
-                        <div class="item-img-wrap">
-                            <img src="${item.img}" alt="${item.name}" loading="lazy" decoding="async" class="item-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22260%22 height=%22200%22 style=%22background:%23f1f5f9;%22%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%2394a3b8%22%3Eصورة غير متوفرة%3C/text%3E%3C/svg%3E'">
-                        </div>
-                        <div class="item-info">
-                            <div>
-                                <h3>${item.name}</h3>
-                            </div>
-                            <div>
-                                <div class="price">${item.price.toLocaleString()} ر.ي</div>
-                                <button class="add-btn" onclick="addToCart(${item.id}, '${item.name}', ${item.price})">➕ إضافة للسلة</button>
-                            </div>
-                        </div>
-                    </div>`;
-            });
+            availableItems.forEach((item, index) => grid.appendChild(createItemCard(item, index)));
             container.appendChild(grid);
-            setupImageLoadingEffects();
-        }
-
-        function setupImageLoadingEffects() {
-            document.querySelectorAll('.item-img-wrap img').forEach(img => {
-                if (img.complete) {
-                    img.classList.add('loaded');
-                } else {
-                    img.addEventListener('load', () => {
-                        img.classList.add('loaded');
-                    });
-                }
-            });
         }
 
         function setupSearch() {
@@ -1081,44 +1170,26 @@
             const clearBtn = document.getElementById('search-clear-btn');
             const resultsTitle = document.getElementById('search-results-title');
             const termDisplay = document.getElementById('search-term-display');
-
             searchInput.addEventListener('input', function() {
                 const term = this.value.trim();
-
-                if (term.length === 0) {
+                if (!term) {
                     clearSearch();
                     return;
                 }
-
                 isSearching = true;
                 clearBtn.classList.add('visible');
                 resultsTitle.classList.add('visible');
                 termDisplay.textContent = term;
-                
                 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-
-                const allItems = [];
-                menuData.forEach(cat => {
-                    // ✅ إضافة شرط الفلترة أثناء تجميع العناصر للبحث
-                    cat.items.forEach(item => {
-                        if (item.available !== false) {
-                            allItems.push(item);
-                        }
-                    });
-                });
-
-                const filtered = allItems.filter(item =>
-                    item.name.toLowerCase().includes(term.toLowerCase())
-                );
-
+                const allItems = menuData.flatMap(category => category.items.filter(item => item.available !== false));
+                const filtered = allItems.filter(item => item.name.toLocaleLowerCase().includes(term.toLocaleLowerCase()));
                 renderItemsFromArray(filtered, term);
             });
-
             clearBtn.addEventListener('click', function() {
                 searchInput.value = '';
                 clearSearch();
                 const tabs = document.querySelectorAll('.tab-btn');
-                if(tabs[currentTabIndex]) tabs[currentTabIndex].classList.add('active');
+                if (tabs[currentTabIndex]) tabs[currentTabIndex].classList.add('active');
             });
         }
 
@@ -1130,21 +1201,25 @@
             if (menuData.length > 0) renderItems(currentTabIndex);
         }
 
-        window.addToCart = function(id, name, price) {
-            const existingItem = cart.find(i => i.id === id);
+        window.addToCart = function(id) {
+            const item = menuData.flatMap(category => category.items).find(candidate => String(candidate.id) === String(id));
+            if (!item || item.available === false) {
+                alert('هذا الصنف غير متاح حالياً. حدّث الصفحة وحاول مرة أخرى.');
+                return;
+            }
+            const existingItem = cart.find(cartItem => String(cartItem.id) === String(item.id));
             if (existingItem) existingItem.qty++;
-            else cart.push({ id, name, price, qty: 1 });
+            else cart.push({ id: String(item.id), name: item.name, price: item.price, qty: 1 });
             saveCart();
-
             const cartBar = document.getElementById('cart-bar');
             cartBar.classList.remove('pulse-anim');
-            void cartBar.offsetWidth; 
+            void cartBar.offsetWidth;
             cartBar.classList.add('pulse-anim');
         };
 
         window.updateQty = function(id, delta) {
-            const itemIndex = cart.findIndex(i => i.id === id);
-            if (itemIndex > -1) {
+            const itemIndex = cart.findIndex(cartItem => String(cartItem.id) === String(id));
+            if (itemIndex > -1 && (delta === 1 || delta === -1)) {
                 cart[itemIndex].qty += delta;
                 if (cart[itemIndex].qty <= 0) cart.splice(itemIndex, 1);
                 saveCart();
@@ -1154,16 +1229,21 @@
         };
 
         function saveCart() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
+            } catch (error) {
+                console.error('تعذر حفظ السلة محلياً:', error);
+                alert('تعذر حفظ السلة على هذا الجهاز. لا تغلق الصفحة قبل إتمام طلبك.');
+            }
             updateCartUI();
         }
 
         function updateCartUI() {
             const count = cart.reduce((sum, item) => sum + item.qty, 0);
             const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            document.getElementById('cart-count').innerText = count;
-            document.getElementById('cart-total').innerText = total.toLocaleString();
-            document.getElementById('modal-total').innerText = total.toLocaleString();
+            document.getElementById('cart-count').textContent = count.toLocaleString();
+            document.getElementById('cart-total').textContent = total.toLocaleString();
+            document.getElementById('modal-total').textContent = total.toLocaleString();
             document.getElementById('cart-bar').style.display = count > 0 ? 'flex' : 'none';
         }
 
@@ -1176,7 +1256,7 @@
         }
 
         function openModal() {
-            if (cart.length === 0) return alert("سلة الطلبات فارغة حالياً!");
+            if (cart.length === 0) return alert('سلة الطلبات فارغة حالياً!');
             renderCartModalItems();
             document.getElementById('cart-modal').style.display = 'block';
             document.body.style.overflow = 'hidden';
@@ -1184,30 +1264,45 @@
 
         function closeModal() {
             document.getElementById('cart-modal').style.display = 'none';
-            if(!document.getElementById('sidebar-menu').classList.contains('active')){
-                document.body.style.overflow = 'auto';
-            }
+            if (!document.getElementById('sidebar-menu').classList.contains('active')) document.body.style.overflow = 'auto';
         }
 
         function renderCartModalItems() {
             const list = document.getElementById('cart-items-list');
-            list.innerHTML = '';
+            list.replaceChildren();
             cart.forEach(item => {
-                const subtotal = item.price * item.qty;
-                list.innerHTML += `
-                    <div class="cart-item">
-                        <div>
-                            <div class="item-title">${item.name}</div>
-                            <div class="item-price">${subtotal.toLocaleString()} ر.ي <small style="color:#94a3b8; font-weight:normal;">(${item.price.toLocaleString()} للحبة)</small></div>
-                        </div>
-                        <div class="qty-controls">
-                            <button class="qty-btn" onclick="updateQty(${item.id}, 1)">+</button>
-                            <span style="font-weight:900; width: 20px; text-align:center;">${item.qty}</span>
-                            <button class="qty-btn ${item.qty === 1 ? 'delete' : ''}" onclick="updateQty(${item.id}, -1)">
-                                ${item.qty === 1 ? '🗑️' : '-'}
-                            </button>
-                        </div>
-                    </div>`;
+                const row = document.createElement('div');
+                row.className = 'cart-item';
+                const details = document.createElement('div');
+                const title = document.createElement('div');
+                title.className = 'item-title';
+                title.textContent = item.name;
+                const price = document.createElement('div');
+                price.className = 'item-price';
+                price.append(document.createTextNode(`${(item.price * item.qty).toLocaleString()} ر.ي `));
+                const unit = document.createElement('small');
+                unit.style.cssText = 'color:#94a3b8;font-weight:normal;';
+                unit.textContent = `(${item.price.toLocaleString()} للحبة)`;
+                price.appendChild(unit);
+                details.append(title, price);
+                const controls = document.createElement('div');
+                controls.className = 'qty-controls';
+                const plus = document.createElement('button');
+                plus.className = 'qty-btn';
+                plus.type = 'button';
+                plus.textContent = '+';
+                plus.addEventListener('click', () => updateQty(item.id, 1));
+                const quantity = document.createElement('span');
+                quantity.style.cssText = 'font-weight:900;width:20px;text-align:center;';
+                quantity.textContent = item.qty.toLocaleString();
+                const minus = document.createElement('button');
+                minus.className = `qty-btn ${item.qty === 1 ? 'delete' : ''}`;
+                minus.type = 'button';
+                minus.textContent = item.qty === 1 ? '🗑️' : '-';
+                minus.addEventListener('click', () => updateQty(item.id, -1));
+                controls.append(plus, quantity, minus);
+                row.append(details, controls);
+                list.appendChild(row);
             });
         }
 
@@ -1215,8 +1310,7 @@
             const customerNameInput = document.getElementById('customer-name');
             const customerName = customerNameInput.value.trim();
             if (!customerName) {
-                alert("فضلاً، أدخل اسمك الكريم في الأعلى لنتمكن من تحضير طلبك باسمك.");
-                closeModal();
+                alert('فضلاً، أدخل اسمك في الأعلى لنتمكن من تحضير طلبك باسمك.');
                 customerNameInput.focus();
                 return;
             }
@@ -1224,23 +1318,30 @@
 
             let message = `*🍽️ طلب جديد من مطعم الريان*\n`;
             message += `*العميل:* ${customerName}\n`;
-            message += `---------------------------\n`;
+            message += '---------------------------\n';
             let total = 0;
             cart.forEach(item => {
                 const subtotal = item.price * item.qty;
                 message += `▪️ ${item.qty} × ${item.name} = ${subtotal.toLocaleString()} ر.ي\n`;
                 total += subtotal;
             });
-            message += `---------------------------\n`;
+            message += '---------------------------\n';
             message += `*💰 الإجمالي النهائي: ${total.toLocaleString()} ر.ي*\n`;
-            message += `الرجاء تأكيد استلام الطلب، شكراً لكم!`;
+            message += 'الرجاء تأكيد استلام الطلب، شكراً لكم!';
 
-            const encodedMessage = encodeURIComponent(message);
-            window.open(`https://wa.me/${restaurantPhone}?text=${encodedMessage}`, '_blank');
-            
-            cart = [];
-            saveCart();
-            closeModal();
+            const whatsappUrl = `https://wa.me/${restaurantPhone}?text=${encodeURIComponent(message)}`;
+            const whatsappWindow = window.open(whatsappUrl, '_blank');
+            if (!whatsappWindow) {
+                alert('منع المتصفح فتح واتساب. لم يتم إفراغ السلة؛ اسمح بالنوافذ المنبثقة أو أعد المحاولة.');
+                return;
+            }
+            try { whatsappWindow.opener = null; } catch (_) {}
+            const customerConfirmed = confirm('تم فتح واتساب. هل أرسلت الطلب بالفعل؟\nاضغط «موافق» لإفراغ السلة، أو «إلغاء» للاحتفاظ بها.');
+            if (customerConfirmed) {
+                cart = [];
+                saveCart();
+                closeModal();
+            }
         }
 
         document.getElementById('cart-toggle').addEventListener('click', openModal);
@@ -1248,11 +1349,11 @@
         document.getElementById('close-modal-btn').addEventListener('click', closeModal);
         document.getElementById('whatsapp-send').addEventListener('click', sendOrder);
         document.getElementById('clear-cart').addEventListener('click', clearCart);
-        
+
         window.onclick = function(event) {
             const modal = document.getElementById('cart-modal');
-            if (event.target == modal) closeModal();
-        }
+            if (event.target === modal) closeModal();
+        };
     </script>
 
     <!-- ✅ كود PWA (Service Worker + زر التثبيت) -->
