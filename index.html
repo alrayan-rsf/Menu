@@ -956,10 +956,15 @@
             window.scrollTo({ top: searchInput.offsetTop - 100, behavior: 'smooth' });
         }
 
-        async function fetchMenu() {
+        async function fetchMenu(options = {}) {
+            const { silent = false } = options;
             try {
-                const response = await fetch('menu.json', { cache: 'no-cache' });
-                if (!response.ok) throw new Error('تعذر تحميل ملف القائمة');
+                // cache-busting يمنع الاعتماد على نسخة قديمة من الأسعار عند فتح الموقع أو تحديثه.
+                const response = await fetch(`menu.json?refresh=${Date.now()}`, {
+                    cache: 'no-store',
+                    headers: { 'Cache-Control': 'no-cache', 'X-Require-Fresh': silent ? '1' : '0' }
+                });
+                if (!response.ok) throw new Error('تعذر تحميل ملف القائمة الحالي');
                 const rawData = await response.json();
                 const categories = rawData && typeof rawData === 'object' && Array.isArray(rawData.categories)
                     ? rawData.categories
@@ -1003,18 +1008,28 @@
 
                 menuData = validCategories;
                 tickerText = typeof rawData.ticker_text === 'string' ? rawData.ticker_text : '';
-                reconcileCartWithMenu();
-                renderTicker(tickerText);
-                renderTabs();
-                if (menuData.length > 0) renderItems(0);
+                const changes = reconcileCartWithMenu();
+                if (!silent) {
+                    renderTicker(tickerText);
+                    renderTabs();
+                    if (menuData.length > 0) renderItems(0);
+                }
+                if (document.getElementById('cart-modal').style.display === 'block') renderCartModalItems();
+                if (!silent && (changes.priceChanges.length || changes.removedItems.length)) {
+                    alert(formatCartChangeNotice(changes));
+                }
+                return { ok: true, changes };
             } catch (error) {
                 console.error(error);
-                const container = document.getElementById('menu-container');
-                container.replaceChildren();
-                const message = document.createElement('div');
-                message.style.cssText = 'text-align:center;padding:40px;color:var(--danger-red);font-weight:bold;';
-                message.textContent = '⚠️ تعذر تحميل القائمة. تأكد من صحة ملف menu.json ورفعه بجوار index.html.';
-                container.appendChild(message);
+                if (!silent) {
+                    const container = document.getElementById('menu-container');
+                    container.replaceChildren();
+                    const message = document.createElement('div');
+                    message.style.cssText = 'text-align:center;padding:40px;color:var(--danger-red);font-weight:bold;';
+                    message.textContent = '⚠️ تعذر تحميل القائمة. تأكد من اتصال الإنترنت وصحة ملف menu.json ورفعه بجوار index.html.';
+                    container.appendChild(message);
+                }
+                return { ok: false, error };
             }
         }
 
@@ -1026,19 +1041,47 @@
                 const key = item.name.trim().toLocaleLowerCase();
                 if (!itemsByName.has(key)) itemsByName.set(key, item);
             }));
-            cart = cart.map(cartItem => {
+
+            const priceChanges = [];
+            const removedItems = [];
+            const nextCart = [];
+            cart.forEach(cartItem => {
                 let current = itemsById.get(String(cartItem.id));
-                // ترحيل سلة قديمة بأمان عند إصلاح معرّف مكرر (مثل عصير البرتقال الذي كان يحمل 301).
+                // عند إصلاح معرّف قديم، يمكن ترحيل الصنف بالاسم بشرط أن يكون متاحاً.
                 if (current && current.name !== cartItem.name) {
-                    const nameMatch = itemsByName.get(String(cartItem.name).trim().toLocaleLowerCase());
-                    if (nameMatch) current = nameMatch;
+                    current = itemsByName.get(String(cartItem.name).trim().toLocaleLowerCase()) || null;
                 } else if (!current) {
-                    current = itemsByName.get(String(cartItem.name).trim().toLocaleLowerCase());
+                    current = itemsByName.get(String(cartItem.name).trim().toLocaleLowerCase()) || null;
                 }
-                if (!current) return cartItem;
-                return { id: String(current.id), name: current.name, price: current.price, qty: cartItem.qty };
-            }).filter(item => Number.isFinite(item.price) && item.price >= 0 && Number.isInteger(item.qty) && item.qty > 0);
+
+                if (!current || current.available === false) {
+                    removedItems.push(cartItem.name);
+                    return;
+                }
+                if (Number(current.price) !== Number(cartItem.price)) {
+                    priceChanges.push({ name: current.name, oldPrice: Number(cartItem.price), newPrice: Number(current.price) });
+                }
+                nextCart.push({ id: String(current.id), name: current.name, price: Number(current.price), qty: cartItem.qty });
+            });
+            cart = nextCart;
             saveCart();
+            return { priceChanges, removedItems };
+        }
+
+        function formatCartChangeNotice(changes) {
+            const lines = ['تم تحديث السلة وفق قائمة المطعم الحالية:'];
+            if (changes.priceChanges.length) {
+                lines.push('', 'تغيّرت أسعار الأصناف التالية:');
+                changes.priceChanges.forEach(item => {
+                    lines.push(`• ${item.name}: من ${item.oldPrice.toLocaleString()} إلى ${item.newPrice.toLocaleString()} ر.ي`);
+                });
+            }
+            if (changes.removedItems.length) {
+                lines.push('', 'حُذفت الأصناف التالية من السلة لأنها لم تعد متاحة أو لم تعد موجودة في القائمة:');
+                changes.removedItems.forEach(name => lines.push(`• ${name}`));
+            }
+            lines.push('', 'راجع السلة والإجمالي الجديد قبل إرسال الطلب.');
+            return lines.join('\n');
         }
 
         function renderTicker(text) {
@@ -1306,7 +1349,7 @@
             });
         }
 
-        function sendOrder() {
+        async function sendOrder() {
             const customerNameInput = document.getElementById('customer-name');
             const customerName = customerNameInput.value.trim();
             if (!customerName) {
@@ -1315,6 +1358,24 @@
                 return;
             }
             if (cart.length === 0) return;
+
+            // نتحقق من أحدث قائمة قبل إنشاء رسالة واتساب، ولا نرسل بأسعار قديمة عند فشل التحديث.
+            const refreshResult = await fetchMenu({ silent: true });
+            if (!refreshResult.ok) {
+                alert('تعذر التحقق من الأسعار الحالية. لم يُرسل الطلب. تحقق من اتصال الإنترنت ثم أعد المحاولة.');
+                return;
+            }
+            const changes = refreshResult.changes;
+            if (changes.priceChanges.length || changes.removedItems.length) {
+                renderCartModalItems();
+                alert(formatCartChangeNotice(changes));
+                return;
+            }
+            if (cart.length === 0) {
+                alert('أصبحت السلة فارغة لأن الأصناف لم تعد متاحة.');
+                closeModal();
+                return;
+            }
 
             let message = `*🍽️ طلب جديد من مطعم الريان*\n`;
             message += `*العميل:* ${customerName}\n`;

@@ -1,8 +1,8 @@
 // ============================================
 // Service Worker - مطعم الريان
 // ============================================
-const CACHE_NAME = 'rayyan-menu-v1.0.0';
-const RUNTIME_CACHE = 'rayyan-runtime-v1.0.0';
+const CACHE_NAME = 'rayyan-menu-v1.1.0';
+const RUNTIME_CACHE = 'rayyan-runtime-v1.1.0';
 
 // الملفات الأساسية التي سيتم تخزينها مسبقاً
 const PRECACHE_URLS = [
@@ -68,18 +68,25 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // ملف menu.json - الشبكة أولاً (لأنه يتغير باستمرار)
+    // ملف menu.json - الشبكة أولاً، مع نسخة احتياطية للتصفح عند انقطاع الإنترنت.
+    // طلبات التحقق قبل إرسال الطلب تحمل X-Require-Fresh: 1 ولا يُسمح لها باستخدام نسخة قديمة.
     if (url.pathname.endsWith('menu.json')) {
         event.respondWith(
             fetch(request)
                 .then(response => {
+                    if (!response || !response.ok) return response;
                     const responseClone = response.clone();
-                    caches.open(RUNTIME_CACHE).then(cache => {
-                        cache.put(request, responseClone);
-                    });
+                    const canonicalMenuUrl = new URL('./menu.json', self.registration.scope).href;
+                    caches.open(RUNTIME_CACHE).then(cache => cache.put(canonicalMenuUrl, responseClone));
                     return response;
                 })
-                .catch(() => caches.match(request))
+                .catch(async error => {
+                    if (request.headers.get('X-Require-Fresh') === '1') throw error;
+                    const canonicalMenuUrl = new URL('./menu.json', self.registration.scope).href;
+                    const cached = await caches.match(canonicalMenuUrl);
+                    if (cached) return cached;
+                    throw error;
+                })
         );
         return;
     }
